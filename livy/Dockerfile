@@ -1,6 +1,6 @@
-ARG LIVY_SPARK=ghcr.io/meganote/livy-spark:main
+ARG RELEASE=main
 
-FROM $LIVY_SPARK
+FROM ghcr.io/meganote/livy-spark:${RELEASE}
 
 RUN cp $LIVY_CONF_DIR/log4j.properties.template $LIVY_CONF_DIR/log4j.properties && \
     mkdir -p $LIVY_HOME/work-dir && \

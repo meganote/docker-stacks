@@ -69,7 +69,7 @@ jobs:
           # generate Docker tags based on the following events/attributes
           tags: |
             type=ref,event=branch
-            type=semver,pattern={{raw}}
+            type=semver,pattern={{ raw }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -78,6 +78,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: ./builder
+          build-args: RELEASE=${{ teps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -174,6 +175,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: ./livy-spark
+          build-args: RELEASE=${{ teps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -247,6 +249,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: ./livy
+          build-args: RELEASE=${{ teps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
