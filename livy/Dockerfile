@@ -1,4 +1,4 @@
-ARG LIVY_SPARK=ghcr.io/xiaomao23zhi/magnote-docker-stack/livy-spark:main
+ARG LIVY_SPARK=ghcr.io/meganote/livy-spark:main
 
 FROM $LIVY_SPARK
 
