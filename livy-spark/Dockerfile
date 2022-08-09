@@ -1,8 +1,9 @@
-ARG RELEASE=main
-ARG SPARK_BASE=ghcr.io/meganote/spark:v3.3.0_hadoop3
+ARG MAVEN_BUILDER=ghcr.io/meganote/builder:v0.1.0
+ARG SPARK_VERSION=3.3.0
+ARG HADOOP_VERSION=hadoop3
 
 ### Livy Builder Container
-FROM ghcr.io/meganote/builder:${RELEASE} as build
+FROM ${MAVEN_BUILDER} as build
 
 ARG LIVY_GITHUB_REPO=xiaomao23zhi/incubator-livy
 ARG LIVY_GITHUB_BRANCH=LIVY-327-spark_3.3.0
@@ -18,7 +19,7 @@ RUN git clone https://github.com/${LIVY_GITHUB_REPO}.git --branch ${LIVY_GITHUB_
     cp assembly/target/apache-livy-0.8.0-incubating-SNAPSHOT-bin.zip /
 
 ### Final Container
-FROM ${SPARK_BASE}
+FROM ghcr.io/meganote/spark:v${SPARK_VERSION}-${HADOOP_VERSION}
 
 ARG LIVY_VERSION_ARG=0.8.0-incubating-SNAPSHOT
 
