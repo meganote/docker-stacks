@@ -164,7 +164,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/livy-spark
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=raw,value=v${{ env.LIVY_VERSION }}-spark_${{ env.SPARK_VERSION }}-${{ env.HADOOP_VERSION }}
+            type=raw,value=v${{ env.LIVY_VERSION }}_spark-${{ env.SPARK_VERSION }}-${{ env.HADOOP_VERSION }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -240,7 +240,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=raw,value=v${{ env.LIVY_VERSION }}-spark${{ env.SPARK_VERSION }}-${{ env.HADOOP_VERSION }}
+            type=raw,value=v${{ env.LIVY_VERSION }}_spark-${{ env.SPARK_VERSION }}-${{ env.HADOOP_VERSION }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
