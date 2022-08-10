@@ -237,7 +237,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}
+          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/livy
           # generate Docker tags based on the following events/attributes
           tags: |
             type=raw,value=v${{ env.LIVY_VERSION }}_spark-${{ env.SPARK_VERSION }}-${{ env.HADOOP_VERSION }}
@@ -250,9 +250,9 @@ jobs:
         with:
           context: ./livy
           build-args: |
-            LIVY_VERSION = ${{ env.LIVY_VERSION }}
-            SPARK_VERSION = ${{ env.SPARK_VERSION }}
-            HADOOP_VERSION = ${{ env.HADOOP_VERSION }}
+            LIVY_VERSION=${{ env.LIVY_VERSION }}
+            SPARK_VERSION=${{ env.SPARK_VERSION }}
+            HADOOP_VERSION=${{ env.HADOOP_VERSION }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
