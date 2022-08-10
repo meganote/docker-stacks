@@ -2,7 +2,7 @@ ARG LIVY_VERSION=0.8.0
 ARG SPARK_VERSION=3.3.0
 ARG HADOOP_VERSION=haoop3
 
-FROM ghcr.io/meganote/livy-spark:v${LIVY_VERSION}-spark_${SPARK_VERSION}-${HADOOP_VERSION}
+FROM ghcr.io/meganote/livy-spark:v${LIVY_VERSION}_spark-${SPARK_VERSION}-${HADOOP_VERSION}
 
 RUN cp $LIVY_CONF_DIR/log4j.properties.template $LIVY_CONF_DIR/log4j.properties && \
     mkdir -p $LIVY_HOME/work-dir && \
