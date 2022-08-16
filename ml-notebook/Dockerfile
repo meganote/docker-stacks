@@ -6,6 +6,7 @@ USER root
 
 # Install packages
 RUN apt-get update --yes && \
+    apt-get upgrade --yes && \
     apt-get install --yes --no-install-recommends \
     graphviz \
     julia \
