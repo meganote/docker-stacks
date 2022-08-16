@@ -8,7 +8,7 @@ AWS_JAVA_SDK_BUNDLE_VERSION=1.11.1034
 HADOOP_AWS_VERSION=3.2.4
 
 REPO=ghcr.io/meganote
-TAG=v${SPARK_VERSION}_${HADOOP_VERSION}
+TAG=v${SPARK_VERSION}-${HADOOP_VERSION}
 
 wget -q https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz
 tar -xvf spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz

@@ -18,11 +18,12 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   ORGANIZATION: meganote
-
+  SPARK_VERSION: 3.3.0
+  HADOOP_VERSION: hadoop3
+  LIVY_VERSION: 0.8.0
 
 jobs:
   builder:
-    name: builder
 
     runs-on: ubuntu-latest
     permissions:
@@ -68,8 +69,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/builder
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=ref,event=branch
-            type=semver,pattern={{ raw }}
+            type=raw,value=v0.1.0
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -78,7 +78,6 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: ./builder
-          build-args: RELEASE=${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -117,7 +116,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Run build.sh
-        run: ./spark/build.sh
+        run: ./spark/build.sh ${{ env.SPARK_VERSION }} ${{ env.HADOOP_VERSION }}
 
   livy-spark:
     needs: [builder, spark]
@@ -165,8 +164,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/livy-spark
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=ref,event=branch
-            type=semver,pattern={{raw}}
+            type=raw,value=v${{ env.LIVY_VERSION }}_spark-${{ env.SPARK_VERSION }}-${{ env.HADOOP_VERSION }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -175,7 +173,10 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: ./livy-spark
-          build-args: RELEASE=${{ steps.meta.outputs.tags }}
+          #build-args: SPARK_TAG=${{ steps.meta.outputs.tags }}
+          build-args: |
+            SPARK_VERSION=${{ env.SPARK_VERSION }}
+            HADOOP_VERSION=${{ env.HADOOP_VERSION }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -236,11 +237,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}
+          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/livy
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=ref,event=branch
-            type=semver,pattern={{raw}}
+            type=raw,value=v${{ env.LIVY_VERSION }}_spark-${{ env.SPARK_VERSION }}-${{ env.HADOOP_VERSION }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -249,7 +249,10 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: ./livy
-          build-args: RELEASE=${{ steps.meta.outputs.tags }}
+          build-args: |
+            LIVY_VERSION=${{ env.LIVY_VERSION }}
+            SPARK_VERSION=${{ env.SPARK_VERSION }}
+            HADOOP_VERSION=${{ env.HADOOP_VERSION }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
