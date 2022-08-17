@@ -114,6 +114,7 @@ RUN mkdir /home/$NB_USER/.sparkmagic
 COPY --chown=${NB_UID}:${NB_GID} ./config.json.template /home/$NB_USER/.sparkmagic/config.json.template
 COPY --chown=${NB_UID}:${NB_GID} ./logo/spark-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/sparkkernel/logo-64x64.png
 COPY --chown=${NB_UID}:${NB_GID} ./logo/pyspark-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/pysparkkernel/logo-64x64.png
+COPY --chown=${NB_UID}:${NB_GID} ./logo/sparkr-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/sparkrkernel/logo-64x64.png
 
 # Install Dask
 RUN conda create --name dask && \
