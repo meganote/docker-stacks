@@ -53,8 +53,6 @@ RUN mkdir /etc/julia && \
     chown "${NB_USER}" "${JULIA_PKGDIR}" && \
     fix-permissions "${JULIA_PKGDIR}"
 
-USER ${NB_USER}
-
 # Add user-settings
 COPY --chown=${NB_UID}:${NB_GID} user-settings/ /home/jovyan/.jupyter/lab/user-settings/
 
@@ -105,8 +103,9 @@ RUN julia -e 'import Pkg; Pkg.update()' && \
 RUN pip install --no-cache-dir sparkmagic && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
-    jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkkernel && \
-    jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/pysparkkernel && \
+    jupyter-kernelspec install $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkkernel && \
+    jupyter-kernelspec install $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/pysparkkernel && \
+    jupyter-kernelspec install $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkrkernel && \
     jupyter serverextension enable --py sparkmagic && \
     jupyter labextension disable ipyparallel-labextension
 RUN mkdir /home/$NB_USER/.sparkmagic
@@ -129,7 +128,7 @@ RUN pip install --no-cache-dir \
     && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
-    python -m ipykernel install --user --name dask --display-name "Dask"
+    python -m ipykernel install --name dask --display-name "Dask"
 #COPY ./logo/dask-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/dask/logo-64x64.png
 COPY ./logo/dask-logo-64x64.png /opt/conda/share/jupyter/kernels/dask/logo-64x64.png
 
@@ -155,4 +154,4 @@ EXPOSE 8786
 
 WORKDIR "${HOME}"
 
-USER $NB_UID
+USER ${NB_UID}
