@@ -114,9 +114,9 @@ COPY --chown=${NB_UID}:${NB_GID} ./config.json.template /home/$NB_USER/.sparkmag
 #COPY --chown=${NB_UID}:${NB_GID} ./logo/spark-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/sparkkernel/logo-64x64.png
 #COPY --chown=${NB_UID}:${NB_GID} ./logo/pyspark-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/pysparkkernel/logo-64x64.png
 #COPY --chown=${NB_UID}:${NB_GID} ./logo/sparkr-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/sparkrkernel/logo-64x64.png
-COPY --chown=${NB_UID}:${NB_GID} ./logo/spark-logo-64x64.png /opt/conda/share/jupyter/kernels/sparkkernel/logo-64x64.png
-COPY --chown=${NB_UID}:${NB_GID} ./logo/pyspark-logo-64x64.png /opt/conda/share/jupyter/kernels/pysparkkernel/logo-64x64.png
-COPY --chown=${NB_UID}:${NB_GID} ./logo/sparkr-logo-64x64.png /opt/conda/share/jupyter/kernels/sparkrkernel/logo-64x64.png
+COPY --chown=${NB_UID}:${NB_GID} ./logo/spark-logo-64x64.png /usr/local/share/jupyter/kernels/sparkkernel/logo-64x64.png
+COPY --chown=${NB_UID}:${NB_GID} ./logo/pyspark-logo-64x64.png /usr/local/share/jupyter/kernels/pysparkkernel/logo-64x64.png
+COPY --chown=${NB_UID}:${NB_GID} ./logo/sparkr-logo-64x64.png /usr/local/share/jupyter/kernels/sparkrkernel/logo-64x64.png
 
 # Install Dask
 RUN conda create --name dask && \
@@ -130,7 +130,7 @@ RUN pip install --no-cache-dir \
     fix-permissions "/home/${NB_USER}" && \
     python -m ipykernel install --name dask --display-name "Dask"
 #COPY ./logo/dask-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/dask/logo-64x64.png
-COPY ./logo/dask-logo-64x64.png /opt/conda/share/jupyter/kernels/dask/logo-64x64.png
+COPY ./logo/dask-logo-64x64.png /usr/local/share/jupyter/kernels/dask/logo-64x64.png
 
 # Install airflow
 RUN AIRFLOW_VERSION=2.3.3 && \
