@@ -24,8 +24,7 @@ RUN chmod +x /usr/local/bin/before-notebook.d/sparkmagic.sh
 ARG julia_version="1.7.3"
 # Julia dependencies
 # install Julia packages in /opt/julia instead of ${HOME}
-ENV JULIA_DEPOT_PATH=/opt/julia \
-    JULIA_PKGDIR=/opt/julia \
+ENV JULIA_HOME=/opt/julia \
     JULIA_VERSION="${julia_version}"
 
 WORKDIR /tmp
@@ -39,22 +38,18 @@ RUN set -x && \
     fi; \
     julia_installer="julia-${JULIA_VERSION}-linux-${julia_arch}.tar.gz" && \
     julia_major_minor=$(echo "${JULIA_VERSION}" | cut -d. -f 1,2) && \
-    mkdir "/opt/julia-${JULIA_VERSION}" && \
+    mkdir "${JULIA_HOME}" && \
     wget -q "https://julialang-s3.julialang.org/bin/linux/${julia_short_arch}/${julia_major_minor}/${julia_installer}" && \
-    tar xzf "${julia_installer}" -C "/opt/julia-${JULIA_VERSION}" --strip-components=1 && \
+    tar xzf "${julia_installer}" -C "/${JULIA_HOME}" --strip-components=1 && \
     rm "${julia_installer}" && \
-    ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
+    ln -fs /opt/julia/bin/julia /usr/local/bin/julia
 
 # Show Julia where conda libraries are \
-RUN mkdir /etc/julia && \
-    echo "push!(Libdl.DL_LOAD_PATH, \"${CONDA_DIR}/lib\")" >> /etc/julia/juliarc.jl && \
-    # Create JULIA_PKGDIR \
-    mkdir "${JULIA_PKGDIR}" && \
-    chown "${NB_USER}" "${JULIA_PKGDIR}" && \
-    fix-permissions "${JULIA_PKGDIR}"
+RUN echo "push!(Libdl.DL_LOAD_PATH, \"${CONDA_DIR}/lib\")" >> /etc/julia/juliarc.jl && \
+    chown "${NB_USER}" "${JULIA_HOME}" && \
+    fix-permissions "${JULIA_HOME}"
 
-# Add user-settings
-COPY --chown=${NB_UID}:${NB_GID} user-settings/ /home/jovyan/.jupyter/lab/user-settings/
+USER ${NB_UID}
 
 # Install from requirements.txt file
 #COPY --chown=${NB_UID}:${NB_GID} requirements.txt /tmp/
@@ -103,20 +98,24 @@ RUN julia -e 'import Pkg; Pkg.update()' && \
 RUN pip install --no-cache-dir sparkmagic && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
-    jupyter-kernelspec install $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkkernel && \
-    jupyter-kernelspec install $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/pysparkkernel && \
-    jupyter-kernelspec install $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkrkernel && \
+    jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkkernel && \
+    jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/pysparkkernel && \
+    jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkrkernel && \
+    mv "${HOME}.local/share/jupyter/kernels/sparkkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
+    mv "${HOME}.local/share/jupyter/kernels/pysparkkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
+    mv "${HOME}.local/share/jupyter/kernels/sparkrkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     jupyter serverextension enable --py sparkmagic && \
-    jupyter labextension disable ipyparallel-labextension
+    jupyter labextension disable ipyparallel-labextension && \
+    fix-permissions "${CONDA_DIR}/share/jupyter"
 RUN mkdir /home/$NB_USER/.sparkmagic
 
 COPY --chown=${NB_UID}:${NB_GID} ./config.json.template /home/$NB_USER/.sparkmagic/config.json.template
 #COPY --chown=${NB_UID}:${NB_GID} ./logo/spark-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/sparkkernel/logo-64x64.png
 #COPY --chown=${NB_UID}:${NB_GID} ./logo/pyspark-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/pysparkkernel/logo-64x64.png
 #COPY --chown=${NB_UID}:${NB_GID} ./logo/sparkr-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/sparkrkernel/logo-64x64.png
-COPY --chown=${NB_UID}:${NB_GID} ./logo/spark-logo-64x64.png /usr/local/share/jupyter/kernels/sparkkernel/logo-64x64.png
-COPY --chown=${NB_UID}:${NB_GID} ./logo/pyspark-logo-64x64.png /usr/local/share/jupyter/kernels/pysparkkernel/logo-64x64.png
-COPY --chown=${NB_UID}:${NB_GID} ./logo/sparkr-logo-64x64.png /usr/local/share/jupyter/kernels/sparkrkernel/logo-64x64.png
+COPY --chown=${NB_UID}:${NB_GID} ./logo/spark-logo-64x64.png ${CONDA_DIR}/share/jupyter/kernels/sparkkernel/logo-64x64.png
+COPY --chown=${NB_UID}:${NB_GID} ./logo/pyspark-logo-64x64.png ${CONDA_DIR}/share/jupyter/kernels/pysparkkernel/logo-64x64.png
+COPY --chown=${NB_UID}:${NB_GID} ./logo/sparkr-logo-64x64.png ${CONDA_DIR}/share/jupyter/kernels/sparkrkernel/logo-64x64.png
 
 # Install Dask
 RUN conda create --name dask && \
@@ -128,15 +127,18 @@ RUN pip install --no-cache-dir \
     && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
-    python -m ipykernel install --name dask --display-name "Dask"
+    python -m ipykernel install --user --name dask --display-name "Dask" && \
+    mv "${HOME}.local/share/jupyter/kernels/dask"* "${CONDA_DIR}/share/jupyter/kernels/" && \
+    fix-permissions "${CONDA_DIR}/share/jupyter"
 #COPY ./logo/dask-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/dask/logo-64x64.png
-COPY ./logo/dask-logo-*.png /usr/local/share/jupyter/kernels/dask
+COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-*.png ${CONDA_DIR}/share/jupyter/kernels/dask/
 
 # Install airflow
 RUN AIRFLOW_VERSION=2.3.3 && \
     PYTHON_VERSION="$(python --version | cut -d " " -f 2 | cut -d "." -f 1-2)" && \
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt" && \
-    pip install --no-cache-dir "apache-airflow[async,jdbc,mongo,papermill,presto,sftp]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+    pip install --no-cache-dir "apache-airflow[async,jdbc,mongo,papermill,presto,sftp]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}" && \
+    fix-permissions "${CONDA_DIR}/share/jupyter"
 
 ## Built in kernels
 #COPY --chown=${NB_UID}:${NB_GID} ./kernels/ /opt/conda/share/jupyter/kernels/
@@ -144,6 +146,9 @@ RUN AIRFLOW_VERSION=2.3.3 && \
 # pip & conda rc
 COPY --chown=${NB_UID}:${NB_GID} .condarc /home/${NB_USER}
 COPY --chown=${NB_UID}:${NB_GID} .pip/ /home/${NB_USER}/.pip/
+
+# Add user-settings
+COPY --chown=${NB_UID}:${NB_GID} user-settings/ /home/jovyan/.jupyter/lab/user-settings/
 
 # clean up
 RUN rm -rf ~/.cache/pip ~/.cache/yarn
@@ -153,5 +158,3 @@ EXPOSE 8787
 EXPOSE 8786
 
 WORKDIR "${HOME}"
-
-USER ${NB_UID}
