@@ -45,7 +45,8 @@ RUN set -x && \
     ln -fs /opt/julia/bin/julia /usr/local/bin/julia
 
 # Show Julia where conda libraries are \
-RUN echo "push!(Libdl.DL_LOAD_PATH, \"${CONDA_DIR}/lib\")" >> /etc/julia/juliarc.jl && \
+RUN mkdir /etc/julia && \
+    echo "push!(Libdl.DL_LOAD_PATH, \"${CONDA_DIR}/lib\")" >> /etc/julia/juliarc.jl && \
     chown "${NB_USER}" "${JULIA_HOME}" && \
     fix-permissions "${JULIA_HOME}"
 
