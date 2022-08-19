@@ -129,7 +129,7 @@ RUN pip install --no-cache-dir \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
     python -m ipykernel install --user --name dask --display-name "Dask" && \
-    mv "${HOME}.local/share/jupyter/kernels/dask"* "${CONDA_DIR}/share/jupyter/kernels/" && \
+    mv "${HOME}/.local/share/jupyter/kernels/dask"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     fix-permissions "${CONDA_DIR}/share/jupyter"
 #COPY ./logo/dask-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/dask/logo-64x64.png
 COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-*.png ${CONDA_DIR}/share/jupyter/kernels/dask/
