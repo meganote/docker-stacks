@@ -40,7 +40,7 @@ RUN set -x && \
     julia_major_minor=$(echo "${JULIA_VERSION}" | cut -d. -f 1,2) && \
     mkdir "${JULIA_HOME}" && \
     wget -q "https://julialang-s3.julialang.org/bin/linux/${julia_short_arch}/${julia_major_minor}/${julia_installer}" && \
-    tar xzf "${julia_installer}" -C "/${JULIA_HOME}" --strip-components=1 && \
+    tar xzf "${julia_installer}" -C "${JULIA_HOME}" --strip-components=1 && \
     rm "${julia_installer}" && \
     ln -fs /opt/julia/bin/julia /usr/local/bin/julia
 
@@ -102,9 +102,9 @@ RUN pip install --no-cache-dir sparkmagic && \
     jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkkernel && \
     jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/pysparkkernel && \
     jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkrkernel && \
-    mv "${HOME}.local/share/jupyter/kernels/sparkkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
-    mv "${HOME}.local/share/jupyter/kernels/pysparkkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
-    mv "${HOME}.local/share/jupyter/kernels/sparkrkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
+    mv "${HOME}/.local/share/jupyter/kernels/sparkkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
+    mv "${HOME}/.local/share/jupyter/kernels/pysparkkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
+    mv "${HOME}/.local/share/jupyter/kernels/sparkrkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     jupyter serverextension enable --py sparkmagic && \
     jupyter labextension disable ipyparallel-labextension && \
     fix-permissions "${CONDA_DIR}/share/jupyter"
