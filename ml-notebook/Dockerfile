@@ -130,7 +130,7 @@ RUN pip install --no-cache-dir \
     fix-permissions "/home/${NB_USER}" && \
     python -m ipykernel install --name dask --display-name "Dask"
 #COPY ./logo/dask-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/dask/logo-64x64.png
-COPY ./logo/dask-logo-64x64.png /usr/local/share/jupyter/kernels/dask/logo-64x64.png
+COPY ./logo/dask-logo-*.png /usr/local/share/jupyter/kernels/dask
 
 # Install airflow
 RUN AIRFLOW_VERSION=2.3.3 && \
