@@ -132,7 +132,8 @@ RUN pip install --no-cache-dir \
     mv "${HOME}/.local/share/jupyter/kernels/dask"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     fix-permissions "${CONDA_DIR}/share/jupyter"
 #COPY ./logo/dask-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/dask/logo-64x64.png
-COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-*.png ${CONDA_DIR}/share/jupyter/kernels/dask/
+COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-32x32.png ${CONDA_DIR}/share/jupyter/kernels/dask/logo-32x32.png
+COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-64x64.png ${CONDA_DIR}/share/jupyter/kernels/dask/logo-64x64.png
 
 # Install airflow
 RUN AIRFLOW_VERSION=2.3.3 && \
