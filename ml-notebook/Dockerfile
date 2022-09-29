@@ -131,11 +131,11 @@ RUN pip install --no-cache-dir \
     python -m ipykernel install --user --name dask --display-name "Dask" && \
     mv "${HOME}/.local/share/jupyter/kernels/dask"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     fix-permissions "${CONDA_DIR}/share/jupyter"
-#COPY ./logo/dask-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/dask/logo-64x64.png
-COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-*.png ${CONDA_DIR}/share/jupyter/kernels/dask/
+#COPY ./logo/dask-python-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/dask/python-logo-64x64.png
+COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-svg.svg ${CONDA_DIR}/share/jupyter/kernels/dask/logo-svg.svg
 
 # Install airflow
-RUN AIRFLOW_VERSION=2.3.3 && \
+RUN AIRFLOW_VERSION=2.3.4 && \
     PYTHON_VERSION="$(python --version | cut -d " " -f 2 | cut -d "." -f 1-2)" && \
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt" && \
     pip install --no-cache-dir "apache-airflow[async,jdbc,mongo,papermill,presto,sftp]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}" && \
