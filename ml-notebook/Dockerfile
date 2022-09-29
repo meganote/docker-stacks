@@ -1,6 +1,10 @@
 FROM jupyter/all-spark-notebook:spark-3.3.0
 
-MAINTAINER xiaomao23zhi <https://github.com/xiaomao23zhi>
+LABEL maintainer="Meganote Project <https://github.com/meganote>"
+
+# Fix: https://github.com/hadolint/hadolint/wiki/DL4006
+# Fix: https://github.com/koalaman/shellcheck/wiki/SC3014
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 USER root
 
@@ -57,7 +61,7 @@ USER ${NB_UID}
 #RUN pip install --no-cache-dir --requirement /tmp/requirements.txt && \
 
 # Python packages
-RUN pip install --no-cache-dir \
+RUN mamba install --quiet --yes \
     jupyter-resource-usage \
     jupyterlab_execute_time \
     jupyterlab-system-monitor \
@@ -65,6 +69,7 @@ RUN pip install --no-cache-dir \
     python-lsp-server[all] \
     jupyterlab-git \
     && \
+    mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
@@ -96,7 +101,8 @@ RUN julia -e 'import Pkg; Pkg.update()' && \
     fix-permissions "${CONDA_DIR}/share/jupyter"
 
 # Install sparkmagic
-RUN pip install --no-cache-dir sparkmagic && \
+RUN mamba install --quiet --yes \
+    sparkmagic && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
     jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkkernel && \
@@ -107,6 +113,7 @@ RUN pip install --no-cache-dir sparkmagic && \
     mv "${HOME}/.local/share/jupyter/kernels/sparkrkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     jupyter serverextension enable --py sparkmagic && \
     jupyter labextension disable ipyparallel-labextension && \
+    mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}/share/jupyter"
 RUN mkdir /home/$NB_USER/.sparkmagic
 
@@ -121,17 +128,17 @@ COPY --chown=${NB_UID}:${NB_GID} ./logo/sparkr-logo-64x64.png ${CONDA_DIR}/share
 # Install Dask
 RUN conda create --name dask && \
     source activate dask
-RUN pip install --no-cache-dir \
+RUN mamba install --quiet --yes \
     dask-gateway \
     dask-ml \
     dask-labextension \
     && \
+    mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
     python -m ipykernel install --user --name dask --display-name "Dask" && \
     mv "${HOME}/.local/share/jupyter/kernels/dask"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     fix-permissions "${CONDA_DIR}/share/jupyter"
-#COPY ./logo/dask-python-logo-64x64.png /home/jovyan/.local/share/jupyter/kernels/dask/python-logo-64x64.png
 COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-svg.svg ${CONDA_DIR}/share/jupyter/kernels/dask/logo-svg.svg
 
 # Install airflow
