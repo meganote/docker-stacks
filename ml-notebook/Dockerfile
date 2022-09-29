@@ -101,8 +101,7 @@ RUN julia -e 'import Pkg; Pkg.update()' && \
     fix-permissions "${CONDA_DIR}/share/jupyter"
 
 # Install sparkmagic
-RUN mamba install --quiet --yes \
-    sparkmagic && \
+RUN pip install --no-cache-dir sparkmagic && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
     jupyter-kernelspec install --user $(pip show sparkmagic | grep Location | cut -d" " -f2)/sparkmagic/kernels/sparkkernel && \
@@ -113,7 +112,6 @@ RUN mamba install --quiet --yes \
     mv "${HOME}/.local/share/jupyter/kernels/sparkrkernel"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     jupyter serverextension enable --py sparkmagic && \
     jupyter labextension disable ipyparallel-labextension && \
-    mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}/share/jupyter"
 RUN mkdir /home/$NB_USER/.sparkmagic
 
