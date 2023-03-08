@@ -1,5 +1,5 @@
 # Copyright (c) NONE
-ARG BASE_IMAGE=jupyter/all-spark-notebook:spark-3.2.3
+ARG BASE_IMAGE=jupyter/all-spark-notebook:spark-3.3.2
 ARG JULIA_VERSION=1.7.3
 ARG AIRFLOW_VERSION=2.4.3
 FROM $BASE_IMAGE
