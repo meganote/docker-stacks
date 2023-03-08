@@ -142,7 +142,7 @@ RUN mamba install --quiet --yes \
 COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-svg.svg ${CONDA_DIR}/share/jupyter/kernels/dask/logo-svg.svg
 
 # Install airflow
-ARG airflow_version="1.7.3"
+ARG airflow_version="2.4.3"
 RUN AIRFLOW_VERSION=${airflow_version} && \
     PYTHON_VERSION="$(python --version | cut -d " " -f 2 | cut -d "." -f 1-2)" && \
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt" && \
