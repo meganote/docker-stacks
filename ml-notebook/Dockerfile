@@ -1,7 +1,5 @@
 # Copyright (c) NONE
 ARG BASE_IMAGE=jupyter/all-spark-notebook:spark-3.3.2
-ARG JULIA_VERSION=1.7.3
-ARG AIRFLOW_VERSION=2.4.3
 FROM $BASE_IMAGE
 
 LABEL maintainer="Meganote Project <https://github.com/meganote>"
@@ -28,10 +26,12 @@ RUN chmod +x /usr/local/bin/before-notebook.d/sparkmagic.sh
 #COPY ./sparkmagic.sh /usr/local/bin/start-notebook.d/sparkmagic.sh
 #RUN chmod +x /usr/local/bin/start-notebook.d/sparkmagic.sh
 
+# Install Julia
+ARG julia_version="1.7.3"
 # Julia dependencies
 # install Julia packages in /opt/julia instead of ${HOME}
 ENV JULIA_HOME=/opt/julia \
-    JULIA_VERSION="${JULIA_VERSION}"
+    JULIA_VERSION="${julia_version}"
 
 WORKDIR /tmp
 
@@ -142,7 +142,8 @@ RUN mamba install --quiet --yes \
 COPY --chown=${NB_UID}:${NB_GID} ./logo/dask-logo-svg.svg ${CONDA_DIR}/share/jupyter/kernels/dask/logo-svg.svg
 
 # Install airflow
-RUN AIRFLOW_VERSION=${AIRFLOW_VERSION} && \
+ARG airflow_version="1.7.3"
+RUN AIRFLOW_VERSION=${airflow_version} && \
     PYTHON_VERSION="$(python --version | cut -d " " -f 2 | cut -d "." -f 1-2)" && \
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt" && \
     pip install --no-cache-dir "apache-airflow[async,jdbc,mongo,papermill,presto,sftp]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}" && \
