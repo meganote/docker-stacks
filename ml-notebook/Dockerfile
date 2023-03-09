@@ -1,5 +1,5 @@
 # Copyright (c) NONE
-ARG BASE_IMAGE=jupyter/all-spark-notebook:spark-3.3.2
+ARG BASE_IMAGE=jupyter/all-spark-notebook:spark-3.2.1
 FROM $BASE_IMAGE
 
 LABEL maintainer="Meganote Project <https://github.com/meganote>"
