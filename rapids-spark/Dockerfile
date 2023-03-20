@@ -46,9 +46,8 @@ RUN set -ex && \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
-WORKDIR /tmp
-RUN wget -q https://archive.apache.org/dist/spark/spark-3.2.1/spark-3.2.1-bin-hadoop3.2.tgz && \
-    tar zxvf spark-3.2.1-bin-hadoop3.2.tg -C spark
+RUN wget -P /tmp/spark-3.2.1-bin-hadoop3.2.tgz https://archive.apache.org/dist/spark/spark-3.2.1/spark-3.2.1-bin-hadoop3.2.tgz && \
+    tar zxvf spark-3.2.1-bin-hadoop3.2.tgz -C spark
 
 COPY spark/jars /opt/spark/jars
 COPY spark/bin /opt/spark/bin
@@ -63,7 +62,7 @@ RUN wget -q -P /opt/sparkRapidsPlugin https://repo1.maven.org/maven2/com/nvidia/
 #COPY rapids-4-spark_2.12-*.jar /opt/sparkRapidsPlugin
 COPY getGpusResources.sh /opt/sparkRapidsPlugin
 
-RUN rm -f spark-3.2.1-bin-hadoop3.2.tgz
+RUN rm -f /tmp/spark-3.2.1-bin-hadoop3.2.tgz
 
 RUN mkdir /opt/spark/python
 # TODO: Investigate running both pip and pip3 via virtualenvs
