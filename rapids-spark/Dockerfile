@@ -46,7 +46,8 @@ RUN set -ex && \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
-RUN wget -P /tmp/spark-3.2.1-bin-hadoop3.2.tgz https://archive.apache.org/dist/spark/spark-3.2.1/spark-3.2.1-bin-hadoop3.2.tgz && \
+WORKDIR /tmp
+RUN wget https://archive.apache.org/dist/spark/spark-3.2.1/spark-3.2.1-bin-hadoop3.2.tgz && \
     tar zxvf spark-3.2.1-bin-hadoop3.2.tgz -C spark
 
 COPY spark/jars /opt/spark/jars
