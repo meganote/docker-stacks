@@ -47,8 +47,7 @@ RUN set -ex && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
 WORKDIR /tmp
-RUN wget -q -P /opt/sparkRapidsPlugin https://repo1.maven.org/maven2/com/nvidia/rapids-4-spark_2.12/23.02.0/rapids-4-spark_2.12-23.02.0.jar && \
-    wget -q https://archive.apache.org/dist/spark/spark-3.2.1/spark-3.2.1-bin-hadoop3.2.tgz && \
+RUN wget -q https://archive.apache.org/dist/spark/spark-3.2.1/spark-3.2.1-bin-hadoop3.2.tgz && \
     tar zxvf spark-3.2.1-bin-hadoop3.2.tg -C spark
 
 COPY spark/jars /opt/spark/jars
@@ -59,6 +58,8 @@ COPY spark/examples /opt/spark/examples
 COPY spark/kubernetes/tests /opt/spark/tests
 COPY spark/data /opt/spark/data
 
+RUN wget -q -P /opt/sparkRapidsPlugin https://repo1.maven.org/maven2/com/nvidia/rapids-4-spark_2.12/0.5.0/rapids-4-spark_2.12-0.5.0.jar && \
+    wget -q -P /opt/sparkRapidsPlugin https://repo1.maven.org/maven2/ai/rapids/cudf/0.19.2/cudf-0.19.2-cuda11.jar
 #COPY rapids-4-spark_2.12-*.jar /opt/sparkRapidsPlugin
 COPY getGpusResources.sh /opt/sparkRapidsPlugin
 
