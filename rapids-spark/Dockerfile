@@ -89,6 +89,9 @@ ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 RUN chmod +rx /usr/bin/tini
 
+RUN cp /opt/spark/kubernetes/dockerfiles/spark/entrypoint.sh /opt/ && \
+    chmod +rx /opt/entrypoint.sh
+
 ENTRYPOINT [ "/opt/entrypoint.sh" ]
 
 # Specify the User that the actual main process will run as
