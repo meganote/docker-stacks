@@ -22,7 +22,7 @@ ARG spark_version=3.2.1-bin-hadoop3.2
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
 
 # Install java dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk openjdk-8-jre wget
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk openjdk-8-jre curl
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV PATH $PATH:/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/bin:/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin
 
@@ -57,8 +57,8 @@ RUN curl -L https://archive.apache.org/dist/spark/spark-3.2.1/spark-${spark_vers
 #COPY spark-${spark_version}/kubernetes/tests /opt/spark/tests
 #COPY spark-${spark_version}/data /opt/spark/data
 
-RUN wget -q -P /opt/sparkRapidsPlugin https://repo1.maven.org/maven2/com/nvidia/rapids-4-spark_2.12/0.5.0/rapids-4-spark_2.12-0.5.0.jar && \
-    wget -q -P /opt/sparkRapidsPlugin https://repo1.maven.org/maven2/ai/rapids/cudf/0.19.2/cudf-0.19.2-cuda11.jar
+RUN curl -L https://repo1.maven.org/maven2/com/nvidia/rapids-4-spark_2.12/0.5.0/rapids-4-spark_2.12-0.5.0.jar -o /opt/sparkRapidsPlugin && \
+    curl -L https://repo1.maven.org/maven2/ai/rapids/cudf/0.19.2/cudf-0.19.2-cuda11.jar -o /opt/sparkRapidsPlugin
 #COPY rapids-4-spark_2.12-*.jar /opt/sparkRapidsPlugin
 COPY getGpusResources.sh /opt/sparkRapidsPlugin
 
