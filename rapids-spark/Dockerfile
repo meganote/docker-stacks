@@ -16,6 +16,7 @@
 
 FROM nvidia/cuda:11.0.3-devel-ubuntu18.04
 ARG spark_uid=185
+ARG spark_version=3.2.1-bin-hadoop3.2
 
 # https://forums.developer.nvidia.com/t/notice-cuda-linux-repository-key-rotation/212771
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
@@ -47,8 +48,8 @@ RUN set -ex && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
 WORKDIR /tmp
-RUN wget https://archive.apache.org/dist/spark/spark-3.2.1/spark-3.2.1-bin-hadoop3.2.tgz && \
-    tar zxvf spark-3.2.1-bin-hadoop3.2.tgz -C spark
+RUN wget https://archive.apache.org/dist/spark/spark-3.2.1/spark-${spark_version}.tgz
+RUN tar zxvf spark-${spark_version}.tgz
 
 COPY spark/jars /opt/spark/jars
 COPY spark/bin /opt/spark/bin
@@ -63,7 +64,7 @@ RUN wget -q -P /opt/sparkRapidsPlugin https://repo1.maven.org/maven2/com/nvidia/
 #COPY rapids-4-spark_2.12-*.jar /opt/sparkRapidsPlugin
 COPY getGpusResources.sh /opt/sparkRapidsPlugin
 
-RUN rm -f /tmp/spark-3.2.1-bin-hadoop3.2.tgz
+RUN rm -f /tmp/spark-${spark_version}.tgz
 
 RUN mkdir /opt/spark/python
 # TODO: Investigate running both pip and pip3 via virtualenvs
