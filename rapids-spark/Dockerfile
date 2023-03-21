@@ -36,37 +36,35 @@ ENV PATH $PATH:/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/bin:/usr/lib/jvm/java-1
 
 RUN set -ex && \
     ln -s /lib /lib64 && \
-    mkdir -p /opt/spark && \
-    mkdir -p /opt/spark/jars && \
-    mkdir -p /opt/spark/examples && \
-    mkdir -p /opt/spark/work-dir && \
+#    mkdir -p /opt/spark && \
+#    mkdir -p /opt/spark/jars && \
+#    mkdir -p /opt/spark/examples && \
+#    mkdir -p /opt/spark/work-dir && \
     mkdir -p /opt/sparkRapidsPlugin && \
-    touch /opt/spark/RELEASE && \
+#    touch /opt/spark/RELEASE && \
     rm /bin/sh && \
     ln -sv /bin/bash /bin/sh && \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
-WORKDIR /tmp
-RUN wget https://archive.apache.org/dist/spark/spark-3.2.1/spark-${spark_version}.tgz
-RUN tar zxvf spark-${spark_version}.tgz
+RUN curl -L https://archive.apache.org/dist/spark/spark-3.2.1/spark-${spark_version}.tgz | tar zxvf -C /opt/spark --strip-components=1
 
-COPY spark/jars /opt/spark/jars
-COPY spark/bin /opt/spark/bin
-COPY spark/sbin /opt/spark/sbin
-COPY spark/kubernetes/dockerfiles/spark/entrypoint.sh /opt/
-COPY spark/examples /opt/spark/examples
-COPY spark/kubernetes/tests /opt/spark/tests
-COPY spark/data /opt/spark/data
+#COPY spark-${spark_version}/jars /opt/spark/jars
+#COPY spark-${spark_version}/bin /opt/spark/bin
+#COPY spark-${spark_version}/sbin /opt/spark/sbin
+#COPY spark-${spark_version}/kubernetes/dockerfiles/spark/entrypoint.sh /opt/
+#COPY spark-${spark_version}/examples /opt/spark/examples
+#COPY spark-${spark_version}/kubernetes/tests /opt/spark/tests
+#COPY spark-${spark_version}/data /opt/spark/data
 
 RUN wget -q -P /opt/sparkRapidsPlugin https://repo1.maven.org/maven2/com/nvidia/rapids-4-spark_2.12/0.5.0/rapids-4-spark_2.12-0.5.0.jar && \
     wget -q -P /opt/sparkRapidsPlugin https://repo1.maven.org/maven2/ai/rapids/cudf/0.19.2/cudf-0.19.2-cuda11.jar
 #COPY rapids-4-spark_2.12-*.jar /opt/sparkRapidsPlugin
 COPY getGpusResources.sh /opt/sparkRapidsPlugin
 
-RUN rm -f /tmp/spark-${spark_version}.tgz
-
-RUN mkdir /opt/spark/python
+#RUN rm -f /tmp/spark-${spark_version}.tgz
+#
+#RUN mkdir /opt/spark/python
 # TODO: Investigate running both pip and pip3 via virtualenvs
 RUN apt-get update && \
     apt install -y python python-pip && \
@@ -79,8 +77,8 @@ RUN apt-get update && \
     # Removed the .cache to save space
     rm -r /root/.cache && rm -rf /var/cache/apt/*
 
-COPY spark/python/pyspark /opt/spark/python/pyspark
-COPY spark/python/lib /opt/spark/python/lib
+#COPY spark/python/pyspark /opt/spark/python/pyspark
+#COPY spark/python/lib /opt/spark/python/lib
 
 ENV SPARK_HOME /opt/spark
 
