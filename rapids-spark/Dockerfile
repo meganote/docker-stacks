@@ -47,7 +47,7 @@ RUN set -ex && \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
-RUN wget -q https://archive.apache.org/dist/spark/spark-3.2.1/spark-${spark_version}.tgz | tar zxvf -C /opt/spark --strip-components=1
+RUN wget -q https://archive.apache.org/dist/spark/spark-3.2.1/spark-${spark_version}.tgz | xargs -I {} tar zxvf {} -C /opt/spark --strip-components=1
 
 #COPY spark-${spark_version}/jars /opt/spark/jars
 #COPY spark-${spark_version}/bin /opt/spark/bin
