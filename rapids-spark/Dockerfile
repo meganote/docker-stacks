@@ -40,7 +40,7 @@ RUN set -ex && \
 #    mkdir -p /opt/spark/jars && \
 #    mkdir -p /opt/spark/examples && \
     mkdir -p /opt/spark/work-dir && \
-#    mkdir -p /opt/sparkRapidsPlugin && \
+    mkdir -p /opt/sparkRapidsPlugin && \
     touch /opt/spark/RELEASE && \
     rm /bin/sh && \
     ln -sv /bin/bash /bin/sh && \
