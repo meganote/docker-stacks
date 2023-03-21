@@ -36,12 +36,12 @@ ENV PATH $PATH:/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/bin:/usr/lib/jvm/java-1
 
 RUN set -ex && \
     ln -s /lib /lib64 && \
-#    mkdir -p /opt/spark && \
+    mkdir -p /opt/spark && \
 #    mkdir -p /opt/spark/jars && \
 #    mkdir -p /opt/spark/examples && \
-#    mkdir -p /opt/spark/work-dir && \
+    mkdir -p /opt/spark/work-dir && \
     mkdir -p /opt/sparkRapidsPlugin && \
-#    touch /opt/spark/RELEASE && \
+    touch /opt/spark/RELEASE && \
     rm /bin/sh && \
     ln -sv /bin/bash /bin/sh && \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
