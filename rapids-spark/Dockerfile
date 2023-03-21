@@ -58,7 +58,7 @@ RUN curl -L https://archive.apache.org/dist/spark/spark-3.2.1/spark-${spark_vers
 #COPY spark-${spark_version}/data /opt/spark/data
 
 RUN curl -L https://repo1.maven.org/maven2/com/nvidia/rapids-4-spark_2.12/0.5.0/rapids-4-spark_2.12-0.5.0.jar -o /opt/sparkRapidsPlugin/rapids-4-spark_2.12-0.5.0.jar && \
-    curl -L https://repo1.maven.org/maven2/ai/rapids/cudf/0.19.2/cudf-0.19.2-cuda11.jar -0 /opt/sparkRapidsPlugin/cudf-0.19.2-cuda11.jar
+    curl -L https://repo1.maven.org/maven2/ai/rapids/cudf/0.19.2/cudf-0.19.2-cuda11.jar -o /opt/sparkRapidsPlugin/cudf-0.19.2-cuda11.jar
 ##COPY rapids-4-spark_2.12-*.jar /opt/sparkRapidsPlugin
 COPY getGpusResources.sh /opt/sparkRapidsPlugin
 
