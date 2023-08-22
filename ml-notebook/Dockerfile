@@ -29,7 +29,7 @@ RUN chmod +x /usr/local/bin/before-notebook.d/sparkmagic.sh
 # Install Julia
 ARG julia_version="1.7.3"
 # Julia dependencies
-# install Julia packages in /opt/julia instead of ${HOME}
+# install Julia packages in /opt/julia instead of ${HOME}bing
 ENV JULIA_HOME=/opt/julia \
     JULIA_VERSION="${julia_version}"
 

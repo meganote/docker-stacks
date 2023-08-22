@@ -16,7 +16,8 @@
 
 FROM nvidia/cuda:11.0.3-devel-ubuntu18.04
 ARG spark_uid=185
-ARG spark_version=3.2.1-bin-hadoop3.2
+ARG spark_version=3.2.1
+ARG hadoop_version=hadoop3.2
 
 # https://forums.developer.nvidia.com/t/notice-cuda-linux-repository-key-rotation/212771
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
@@ -47,7 +48,7 @@ RUN set -ex && \
     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
-RUN curl -L https://archive.apache.org/dist/spark/spark-3.2.1/spark-${spark_version}.tgz | tar -xz -C /opt/spark --strip-components=1
+RUN curl -L https://archive.apache.org/dist/spark/spark-${spark_version}/spark-${spark_version}-bin-${hadoop_version}.tgz | tar -xz -C /opt/spark --strip-components=1
 
 #COPY spark-${spark_version}/jars /opt/spark/jars
 #COPY spark-${spark_version}/bin /opt/spark/bin
