@@ -19,7 +19,7 @@ wget -q -P ./jars https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bund
 wget -q -P ./jars https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar
 
 # Build images
-./bin/docker-image-tool.sh -r ${REPO} -t ${TAG} -p ./kubernetes/dockerfiles/spark/bindings/python/Dockerfile build
+./bin/docker-image-tool.sh -r ${REPO} -t ${TAG} -p ./kubernetes/dockerfiles/spark/bindings/python/Dockerfile -X build
 
-docker push ${REPO}/spark:${TAG}
-docker push ${REPO}/spark-py:${TAG}
+#docker push ${REPO}/spark:${TAG}
+#docker push ${REPO}/spark-py:${TAG}
