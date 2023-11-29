@@ -78,6 +78,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: ./builder
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -177,6 +178,7 @@ jobs:
           build-args: |
             SPARK_VERSION=${{ env.SPARK_VERSION }}
             HADOOP_VERSION=${{ env.HADOOP_VERSION }}
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -253,6 +255,7 @@ jobs:
             LIVY_VERSION=${{ env.LIVY_VERSION }}
             SPARK_VERSION=${{ env.SPARK_VERSION }}
             HADOOP_VERSION=${{ env.HADOOP_VERSION }}
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
