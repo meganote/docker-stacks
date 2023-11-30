@@ -3,7 +3,7 @@
 set -ex
 
 SPARK_VERSION=3.1.1
-HADOOP_VERSION=hadoop3
+HADOOP_VERSION=hadoop3.2
 AWS_JAVA_SDK_BUNDLE_VERSION=1.11.1034
 HADOOP_AWS_VERSION=3.2.4
 
@@ -20,6 +20,3 @@ wget -q -P ./jars https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${
 
 # Build images
 ./bin/docker-image-tool.sh -r ${REPO} -t ${TAG} -p ./kubernetes/dockerfiles/spark/bindings/python/Dockerfile -X build
-
-#docker push ${REPO}/spark:${TAG}
-#docker push ${REPO}/spark-py:${TAG}
