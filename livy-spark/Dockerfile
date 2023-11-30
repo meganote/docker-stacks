@@ -37,7 +37,7 @@ RUN apt-get install -y unzip && \
     mv /apache-livy-${LIVY_VERSION}-bin /opt/ && \
     rm -rf $LIVY_HOME && \
     ln -s /opt/apache-livy-${LIVY_VERSION}-bin $LIVY_HOME && \
-    rm -f /apache-livy-${LIVY_VERSION}-bin.zip \
+    rm -f /apache-livy-${LIVY_VERSION}-bin.zip
 
 USER ${spark_uid}
 
