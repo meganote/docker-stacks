@@ -4,23 +4,27 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8
-RUN apt-get update && \
+RUN EXTRA_APT_PACKAGES=; \
+    if [ `uname -m` != 'x86_64' ]; then EXTRA_APT_PACKAGES=libpq-dev; fi; \
+    apt-get update && \
+    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-      git \
-      vim \
-      less \
-      python3 \
-      python3-dev \
-      python3-pip \
-      python3-setuptools \
-      python3-wheel \
-      libssl-dev \
-      libcurl4-openssl-dev \
-      build-essential \
-      sqlite3 \
-      curl \
-      dnsutils \
-      && \
+        git \
+        vim \
+        less \
+        python3 \
+        python3-dev \
+        python3-pip \
+        python3-setuptools \
+        python3-wheel \
+        libssl-dev \
+        libcurl4-openssl-dev \
+        build-essential \
+        sqlite3 \
+        curl \
+        dnsutils \
+        $EXTRA_APT_PACKAGES \
+        && \
     rm -rf /var/lib/apt/lists/*
 
 ARG NB_USER=jovyan
@@ -36,17 +40,17 @@ RUN adduser --disabled-password \
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --upgrade --no-cache-dir \
-        setuptools \
-        pip
+    setuptools \
+    pip
 RUN PYCURL_SSL_LIBRARY=openssl \
     pip install --no-cache-dir \
-        -r /tmp/requirements.txt
+    -r /tmp/requirements.txt
 
 # Support overriding a package or two through passed docker --build-args.
 # ARG PIP_OVERRIDES="jupyterhub==1.3.0 git+https://github.com/consideratio/kubespawner.git"
 ARG PIP_OVERRIDES=
 RUN if [[ -n "$PIP_OVERRIDES" ]]; then \
-        pip install --no-cache-dir $PIP_OVERRIDES; \
+    pip install --no-cache-dir $PIP_OVERRIDES; \
     fi
 
 WORKDIR /srv/jupyterhub
