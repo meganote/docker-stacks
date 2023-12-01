@@ -9,7 +9,7 @@ on:
   push:
     # Publish semver tags as releases.
     tags: ["v*.*.*"]
-    branches: [ main, 3.1.1 ]
+    branches: [3.1.1]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
