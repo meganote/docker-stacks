@@ -19,7 +19,7 @@ env:
   # github.repository as <account>/<repo>
   ORGANIZATION: meganote
   SPARK_VERSION: 3.1.1
-  HADOOP_VERSION: 3.2
+  HADOOP_VERSION: hadoop3.2
 
 jobs:
   builder:
