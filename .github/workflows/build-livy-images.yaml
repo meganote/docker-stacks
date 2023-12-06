@@ -1,4 +1,4 @@
-name: build-livy-images
+name: Build-livy-images (branch-3.1, Scala 2.12, Hadoop 3, JDK 11)
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -12,6 +12,12 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to run
+        required: false
+        type: string
+        default: main
 
 env:
   # Use docker.io for Docker Hub if empty
