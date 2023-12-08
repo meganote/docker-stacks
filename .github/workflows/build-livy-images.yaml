@@ -26,6 +26,7 @@ env:
   ORGANIZATION: meganote
   SPARK_VERSION: 3.1.1
   HADOOP_VERSION: hadoop3.2
+  LIVY_VERSION: 0.8.0-incubating
 
 jobs:
   builder:
