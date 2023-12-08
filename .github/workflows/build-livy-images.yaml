@@ -23,181 +23,181 @@ env:
   LIVY_VERSION: 0.8.0
 
 jobs:
-  # builder:
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #     # This is used to complete the identity challenge
-  #     # with sigstore/fulcio when running outside of PRs.
-  #     id-token: write
+  builder:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  #     # Install the cosign tool except on PR
-  #     # https://github.com/sigstore/cosign-installer
-  #     - name: Install cosign
-  #       if: github.event_name != 'pull_request'
-  #       uses: sigstore/cosign-installer@v3.1.1
-  #       with:
-  #         cosign-release: "v2.1.1"
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.1.1
+        with:
+          cosign-release: "v2.1.1"
 
-  #     # Workaround: https://github.com/docker/build-push-action/issues/461
-  #     - name: Setup Docker buildx
-  #       uses: docker/setup-buildx-action@v3
+      # Workaround: https://github.com/docker/build-push-action/issues/461
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v3
 
-  #     # Login against a Docker registry except on PR
-  #     # https://github.com/docker/login-action
-  #     - name: Log into registry ${{ env.REGISTRY }}
-  #       if: github.event_name != 'pull_request'
-  #       uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
-  #       with:
-  #         registry: ${{ env.REGISTRY }}
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  #     # Extract metadata (tags, labels) for Docker
-  #     # https://github.com/docker/metadata-action
-  #     - name: Extract Docker metadata
-  #       id: meta
-  #       uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-  #       with:
-  #         images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/builder
-  #         # generate Docker tags based on the following events/attributes
-  #         tags: |
-  #           type=raw,value=v0.1.0
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/builder
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=raw,value=v0.1.0
 
-  #     # Build and push Docker image with Buildx (don't push on PR)
-  #     # https://github.com/docker/build-push-action
-  #     - name: Build and push Docker image
-  #       id: build-and-push
-  #       uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
-  #       with:
-  #         context: ./builder
-  #         platforms: linux/amd64,linux/arm64
-  #         push: ${{ github.event_name != 'pull_request' }}
-  #         tags: ${{ steps.meta.outputs.tags }}
-  #         labels: ${{ steps.meta.outputs.labels }}
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        with:
+          context: ./builder
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
-  #     # Sign the resulting Docker image digest except on PRs.
-  #     # This will only write to the public Rekor transparency log when the Docker
-  #     # repository is public to avoid leaking data.  If you would like to publish
-  #     # transparency data even for private images, pass --force to cosign below.
-  #     # https://github.com/sigstore/cosign
-  #     - name: Sign the published Docker image
-  #       if: ${{ github.event_name != 'pull_request' }}
-  #       env:
-  #         COSIGN_EXPERIMENTAL: "true"
-  #       # This step uses the identity token to provision an ephemeral certificate
-  #       # against the sigstore community Fulcio instance.
-  #       run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
+      # Sign the resulting Docker image digest except on PRs.
+      # This will only write to the public Rekor transparency log when the Docker
+      # repository is public to avoid leaking data.  If you would like to publish
+      # transparency data even for private images, pass --force to cosign below.
+      # https://github.com/sigstore/cosign
+      - name: Sign the published Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        # This step uses the identity token to provision an ephemeral certificate
+        # against the sigstore community Fulcio instance.
+        run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
 
-  # spark:
-  #   needs: builder
-  #   runs-on: ubuntu-latest
+  spark:
+    needs: builder
+    runs-on: ubuntu-latest
 
-  #   # Steps represent a sequence of tasks that will be executed as part of the job
-  #   steps:
-  #     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-  #     - uses: actions/checkout@v3
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
 
-  #     # Login against a Docker registry except on PR
-  #     # https://github.com/docker/login-action
-  #     - name: Log into registry ${{ env.REGISTRY }}
-  #       if: github.event_name != 'pull_request'
-  #       uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
-  #       with:
-  #         registry: ${{ env.REGISTRY }}
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  #     - name: Set up QEMU
-  #       uses: docker/setup-qemu-action@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-  #     # Runs a single command using the runners shell
-  #     - name: Run build.sh
-  #       run: ./spark/build.sh ${{ env.SPARK_VERSION }} ${{ env.HADOOP_VERSION }}
+      # Runs a single command using the runners shell
+      - name: Run build.sh
+        run: ./spark/build.sh ${{ env.SPARK_VERSION }} ${{ env.HADOOP_VERSION }}
 
-  # livy-spark:
-  #   needs: [builder, spark]
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #     # This is used to complete the identity challenge
-  #     # with sigstore/fulcio when running outside of PRs.
-  #     id-token: write
+  livy-spark:
+    needs: [builder, spark]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  #     # Install the cosign tool except on PR
-  #     # https://github.com/sigstore/cosign-installer
-  #     - name: Install cosign
-  #       if: github.event_name != 'pull_request'
-  #       uses: sigstore/cosign-installer@v3.1.1
-  #       with:
-  #         cosign-release: "v2.1.1"
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.1.1
+        with:
+          cosign-release: "v2.1.1"
 
-  #     # Workaround: https://github.com/docker/build-push-action/issues/461
-  #     - name: Setup Docker buildx
-  #       uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+      # Workaround: https://github.com/docker/build-push-action/issues/461
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
 
-  #     # Login against a Docker registry except on PR
-  #     # https://github.com/docker/login-action
-  #     - name: Log into registry ${{ env.REGISTRY }}
-  #       if: github.event_name != 'pull_request'
-  #       uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
-  #       with:
-  #         registry: ${{ env.REGISTRY }}
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  #     # Extract metadata (tags, labels) for Docker
-  #     # https://github.com/docker/metadata-action
-  #     - name: Extract Docker metadata
-  #       id: meta
-  #       uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-  #       with:
-  #         images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/livy-spark
-  #         # generate Docker tags based on the following events/attributes
-  #         tags: |
-  #           type=raw,value=v${{ env.LIVY_VERSION }}_spark-${{ env.SPARK_VERSION }}-${{ env.HADOOP_VERSION }}
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/livy-spark
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=raw,value=v${{ env.LIVY_VERSION }}_spark-${{ env.SPARK_VERSION }}-${{ env.HADOOP_VERSION }}
 
-  #     # Build and push Docker image with Buildx (don't push on PR)
-  #     # https://github.com/docker/build-push-action
-  #     - name: Build and push Docker image
-  #       id: build-and-push
-  #       uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
-  #       with:
-  #         context: ./livy-spark
-  #         #build-args: SPARK_TAG=${{ steps.meta.outputs.tags }}
-  #         build-args: |
-  #           SPARK_VERSION=${{ env.SPARK_VERSION }}
-  #           HADOOP_VERSION=${{ env.HADOOP_VERSION }}
-  #         platforms: linux/amd64,linux/arm64
-  #         push: ${{ github.event_name != 'pull_request' }}
-  #         tags: ${{ steps.meta.outputs.tags }}
-  #         labels: ${{ steps.meta.outputs.labels }}
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        with:
+          context: ./livy-spark
+          #build-args: SPARK_TAG=${{ steps.meta.outputs.tags }}
+          build-args: |
+            SPARK_VERSION=${{ env.SPARK_VERSION }}
+            HADOOP_VERSION=${{ env.HADOOP_VERSION }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
-  #     # Sign the resulting Docker image digest except on PRs.
-  #     # This will only write to the public Rekor transparency log when the Docker
-  #     # repository is public to avoid leaking data.  If you would like to publish
-  #     # transparency data even for private images, pass --force to cosign below.
-  #     # https://github.com/sigstore/cosign
-  #     - name: Sign the published Docker image
-  #       if: ${{ github.event_name != 'pull_request' }}
-  #       env:
-  #         COSIGN_EXPERIMENTAL: "true"
-  #       # This step uses the identity token to provision an ephemeral certificate
-  #       # against the sigstore community Fulcio instance.
-  #       run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
+      # Sign the resulting Docker image digest except on PRs.
+      # This will only write to the public Rekor transparency log when the Docker
+      # repository is public to avoid leaking data.  If you would like to publish
+      # transparency data even for private images, pass --force to cosign below.
+      # https://github.com/sigstore/cosign
+      - name: Sign the published Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        # This step uses the identity token to provision an ephemeral certificate
+        # against the sigstore community Fulcio instance.
+        run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
 
   livy:
-    # needs: [builder, spark, livy-spark]
+    needs: [builder, spark, livy-spark]
     runs-on: ubuntu-latest
     permissions:
       contents: read
