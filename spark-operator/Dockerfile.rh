@@ -1,5 +1,6 @@
+# syntax=docker/dockerfile:1.0-experimental
 #
-# Copyright 2017 Google LLC
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +15,14 @@
 # limitations under the License.
 #
 
-ARG SPARK_IMAGE=ghcr.io/meganote/spark:v3.1.1-hadoop3.2
+# Build an OpenShift image.
+# Before running docker build, make sure
+# 1. Your Docker version is >= 18.09.3
+# 2. export DOCKER_BUILDKIT=1
 
-FROM golang:1.19.2-alpine as builder
+ARG SPARK_IMAGE=gcr.io/spark-operator/spark:v3.1.1
+
+FROM golang:1.14.0-alpine as builder
 
 WORKDIR /workspace
 
@@ -32,22 +38,20 @@ COPY main.go main.go
 COPY pkg/ pkg/
 
 # Build
-RUN arch=$(uname -m) && \
-    if [ "${arch}" = "x86_64" ]; then \
-      arch="amd64"; \
-    else \
-      arch="arm64"; \
-    fi && \
-    CGO_ENABLED=0 GOOS=linux GOARCH=${arch} GO111MODULE=on go build -a -o /usr/bin/spark-operator main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /usr/bin/spark-operator main.go
 
 FROM ${SPARK_IMAGE}
-USER root
 COPY --from=builder /usr/bin/spark-operator /usr/bin/
-RUN apt-get update --allow-releaseinfo-change \
-    && apt-get update \
-    && apt-get install -y openssl curl tini \
-    && rm -rf /var/lib/apt/lists/*
-COPY hack/gencerts.sh /usr/bin/
+USER root
 
+# Comment out the following three lines if you do not have a RedHat subscription.
+COPY hack/install_packages.sh /
+RUN --mount=target=/opt/spark/credentials,type=secret,id=credentials,required /install_packages.sh
+RUN rm /install_packages.sh
+
+RUN chmod -R u+x /tmp
+
+COPY hack/gencerts.sh /usr/bin/
 COPY entrypoint.sh /usr/bin/
+USER 185
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
