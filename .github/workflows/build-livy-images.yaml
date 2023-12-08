@@ -12,12 +12,6 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    inputs:
-      branch:
-        description: Branch to run
-        required: false
-        type: string
-        default: main
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -26,7 +20,7 @@ env:
   ORGANIZATION: meganote
   SPARK_VERSION: 3.1.1
   HADOOP_VERSION: hadoop3.2
-  LIVY_VERSION: 0.8.0-incubating
+  LIVY_VERSION: 0.8.0
 
 jobs:
   builder:
