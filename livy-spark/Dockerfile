@@ -21,6 +21,17 @@ RUN git clone https://github.com/${LIVY_GITHUB_REPO}.git --branch ${LIVY_GITHUB_
 ### Final Container
 FROM ghcr.io/meganote/spark-py:v${SPARK_VERSION}-${HADOOP_VERSION}
 
+ARG spark_uid=185
+
+ENV SPARK_HOME      /opt/spark
+ENV SPARK_CONF_DIR  $SPARK_HOME/conf
+ENV SPARK_CLASSPATH $SPARK_HOME/cluster-conf
+
+COPY conf/* $SPARK_CONF_DIR/
+# $SPARK_HOME/conf gets cleaned by Spark on Kubernetes internals, create and add to classpath another directory for logging and other configs
+COPY conf/* $SPARK_HOME/cluster-conf/
+COPY entrypoint.sh /opt/
+
 ARG LIVY_VERSION_ARG=0.8.0-incubating-SNAPSHOT
 
 ENV LIVY_VERSION            $LIVY_VERSION_ARG
