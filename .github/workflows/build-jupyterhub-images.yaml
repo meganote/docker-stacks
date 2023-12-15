@@ -17,7 +17,7 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  ORGANIZATION: meganote
+  ORGANIZATION: meganote/jupyterhub
   TAG: 0.11.1
 
 jobs:
