@@ -150,4 +150,6 @@ async def request_fnc(req: JobRequest) -> None:
 
 
 if __name__ == "__main__":
-    cli.run_app(WorkerOptions(request_fnc))
+    option = WorkerOptions(request_fnc)
+    option.host = "0.0.0.0"
+    cli.run_app(option)
