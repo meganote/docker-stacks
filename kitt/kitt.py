@@ -14,6 +14,8 @@ from livekit.agents.llm import (
 from livekit.agents.voice_assistant import AssistantContext, VoiceAssistant
 from livekit.plugins import deepgram, elevenlabs, openai, silero
 
+from plugins import jt
+
 MAX_IMAGES = 3
 NO_IMAGE_MESSAGE_GENERIC = (
     "I'm sorry, I don't have an image to process. Are you publishing your video?"
@@ -47,9 +49,7 @@ async def get_human_video_track(room: rtc.Room):
     remote_video_tracks: List[rtc.RemoteVideoTrack] = []
     for _, p in room.participants.items():
         for _, t_pub in p.tracks.items():
-            if t_pub.track is not None and isinstance(
-                t_pub.track, rtc.RemoteVideoTrack
-            ):
+            if t_pub.track is not None and isinstance(t_pub.track, rtc.RemoteVideoTrack):
                 remote_video_tracks.append(t_pub.track)
 
     if len(remote_video_tracks) > 0:
@@ -80,10 +80,12 @@ async def entrypoint(ctx: JobContext):
     latest_image: rtc.VideoFrame | None = None
     img_msg_queue: deque[agents.llm.ChatMessage] = deque()
     assistant = VoiceAssistant(
-        vad=silero.VAD(),
-        stt=deepgram.STT(),
+        vad=silero.VAD(
+            model_path="/root/.cache/torch/hub/snakers4-silero-vad-7a176cc/files/silero_vad.jit"
+        ),
+        stt=jt.STT(),
         llm=gpt,
-        tts=elevenlabs.TTS(encoding="pcm_44100"),
+        tts=jt.TTS(),
         fnc_ctx=None if sip else AssistantFnc(),
         chat_ctx=initial_ctx,
     )
@@ -135,7 +137,7 @@ async def entrypoint(ctx: JobContext):
     assistant.start(ctx.room)
 
     await asyncio.sleep(0.5)
-    await assistant.say("Hey, how can I help you today?", allow_interruptions=True)
+    # await assistant.say("你好", allow_interruptions=True)
     while ctx.room.connection_state == rtc.ConnectionState.CONN_CONNECTED:
         video_track = await get_human_video_track(ctx.room)
         async for event in rtc.VideoStream(video_track):

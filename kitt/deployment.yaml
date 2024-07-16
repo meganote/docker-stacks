@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-kitt-service-deploy
+  namespace: livekit
+  labels:
+    app: llm-kitt-service
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  selector:
+    matchLabels:
+      app: llm-kitt-service
+  template:
+    metadata:
+      labels:
+        app: llm-kitt-service
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node
+                    operator: In
+                    values:
+                      - service
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: node
+                    operator: In
+                    values:
+                      - service
+              topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 60
+      imagePullSecrets:
+        - name: registry.cmri.cn.key
+      containers:
+        - name: llm-livekit-service
+          image: registry.cmri.cn/znm/livekit/kitt:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          resources:
+            limits:
+              memory: 16Gi
+              cpu: 4
+            requests:
+              memory: 4Gi
+              cpu: 1
+          env:
+            - name: LIVEKIT_URL
+              value: "ws://livekit-server.livekit.svc:80"
+            - name: LIVEKIT_API_KEY
+              value: "API2izbzZn2jUw9"
+            - name: LIVEKIT_API_SECRET
+              value: "qq4RKe9eIh38jM8DlVGNUvhKwTC3bAOXJjzzcevbnOiA"
+            - name: ELEVEN_API_KEY
+              value: "True"
+            - name: DEEPGRAM_API_KEY
+              value: "True"
+            - name: OPENAI_API_KEY
+              value: "True"
+
