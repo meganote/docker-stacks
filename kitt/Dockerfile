@@ -16,7 +16,7 @@ RUN apt-get update && \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-RUN python -m pip install --user --no-cache-dir \
+RUN python -m pip install --no-cache-dir \
     livekit~=0.11.1 \
     livekit-agents~=0.7.2 \
     livekit-api~=0.5.1 \
