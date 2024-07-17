@@ -65,7 +65,7 @@ async def websocket(session, url):
 
 async def main(app):
     session = aiohttp.ClientSession()
-    await websocket(session, "ws://111.51.159.4:48080/asr-online-pythonws/stream")
+    await websocket(session, "ws://host:port/asr-online-pythonws/stream")
 
 
 if __name__ == "__main__":

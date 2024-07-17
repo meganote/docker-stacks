@@ -195,7 +195,7 @@ class SpeechStream(stt.SpeechStream):
                     headers = {"Authorization": f"Token {self._api_key}"}
                     base_url = os.environ.get("ASR_BASE_URL")
 
-                    url = f"ws://{base_url}/stream"
+                    url = f"{base_url}/stream"
                     # logger.info(f"connection to asr: {url}")
                     ws = await self._session.ws_connect(url, headers=headers)
                     retry_count = 0  # connected successfully, reset the retry_count
@@ -286,6 +286,8 @@ class SpeechStream(stt.SpeechStream):
                     # received a message from asr
                     data = json.loads(msg.data)
                     self._process_stream_event(data)
+                    # if data["is_final"] == False and data["mode"] == "2pass-offline":
+                    #     await ws.send_json(SpeechStream._CLOSE_MSG)
                 except Exception:
                     logger.exception("failed to asr deepgram message")
 
@@ -347,7 +349,7 @@ class SpeechStream(stt.SpeechStream):
         assert self._opts.language is not None
 
         logger.debug(f"_process_stream_event: {data}")
-
+        # is_final_transcript = data["is_final"]
         if data["mode"] == "2pass-offline":
             is_final_transcript = True
         else:
@@ -358,6 +360,7 @@ class SpeechStream(stt.SpeechStream):
         # a transcript with text, we should start speaking. It's rare but has
         # been observed.
         if len(alts) > 0 and alts[0].text:
+            # if len(alts) > 0:
             if not self._speaking:
                 self._speaking = True
                 start_event = stt.SpeechEvent(type=stt.SpeechEventType.START_OF_SPEECH)

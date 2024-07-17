@@ -13,6 +13,7 @@ ENV PYTHONUNBUFFERED=1
 # Install gcc and other build dependencies.
 RUN apt-get update && \
     apt-get install -y \
+    procps \
     gcc \
     python3-dev \
     ffmpeg \

@@ -5,7 +5,7 @@ logger = logging.getLogger("livekit.plugins.jt")
 logger.setLevel(logging.DEBUG)
 
 logger_fh = logging.handlers.RotatingFileHandler(
-    "stream.log", mode="a", maxBytes=100 * 1024 * 1024, backupCount=10
+    "app.log", mode="a", maxBytes=100 * 1024 * 1024, backupCount=10
 )
 logger_ch = logging.StreamHandler()
 logger_formatter = logging.Formatter(
@@ -17,3 +17,5 @@ logger_fh.setFormatter(logger_formatter)
 
 logger.addHandler(logger_ch)
 logger.addHandler(logger_fh)
+
+logger.propagate = False
