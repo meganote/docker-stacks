@@ -14,6 +14,7 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && \
     apt-get install -y \
     procps \
+    vim \
     gcc \
     python3-dev \
     ffmpeg \
