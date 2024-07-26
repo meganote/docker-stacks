@@ -28,4 +28,7 @@ RUN python -m pip install --no-cache-dir \
     livekit-plugins-silero~=0.5.3 \
     livekit-plugins-deepgram~=0.5.1 \
     livekit-plugins-elevenlabs~=0.6.0 \
-    livekit-plugins-openai~=0.6.0
+    livekit-plugins-openai~=0.6.0 \
+    livekit-plugins-nltk~=0.6.1
+
+RUN python -m nltk.downloader punkt
