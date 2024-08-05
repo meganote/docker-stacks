@@ -1,10 +1,8 @@
 from typing import Literal
 
-JtModels = Literal[
-    "jt-multimodol",
-]
+STTModels = Literal["jt-multimodol",]
 
-JtLanguages = Literal[
+STTLanguages = Literal[
     "zh",
     "zh-CN",
     "zh-TW",
@@ -28,3 +26,5 @@ TTSEncoding = Literal[
     "pcm_22050",
     "pcm_44100",
 ]
+
+ChatModels = Literal["jt-lan",]

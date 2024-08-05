@@ -16,16 +16,16 @@ from livekit.agents import stt, utils
 from livekit.agents.utils import AudioBuffer, merge_frames
 
 from .log import logger
-from .models import JtLanguages, JtModels
+from .models import STTLanguages, STTModels
 
 
 @dataclass
 class STTOptions:
-    language: JtLanguages | str | None
+    language: STTLanguages | str | None
     detect_language: bool
     interim_results: bool
     punctuate: bool
-    model: JtModels
+    model: STTModels
     smart_format: bool
     no_delay: bool
     endpointing: int | None
@@ -35,21 +35,21 @@ class STT(stt.STT):
     def __init__(
         self,
         *,
-        language: JtLanguages = "zh-CN",
+        language: STTLanguages = "zh-CN",
         detect_language: bool = False,
         interim_results: bool = True,
         punctuate: bool = True,
         smart_format: bool = True,
         no_delay: bool = False,
-        model: JtModels = "jt-multimodol",
+        model: STTModels = "jt-multimodol",
         api_key: str | None = None,
         min_silence_duration: int = 0,
         http_session: aiohttp.ClientSession | None = None,
     ) -> None:
         super().__init__(streaming_supported=True)
         api_key = api_key or os.environ.get("JT_API_KEY")
-        if api_key is None:
-            raise ValueError("JT API key is required")
+        # if api_key is None:
+        #     raise ValueError("JT API key is required")
         self._api_key = api_key
 
         self._opts = STTOptions(
@@ -74,7 +74,7 @@ class STT(stt.STT):
         self,
         *,
         buffer: AudioBuffer,
-        language: JtLanguages | str | None = None,
+        language: STTLanguages | str | None = None,
     ) -> stt.SpeechEvent:
         config = self._sanitize_options(language=language)
 
@@ -83,7 +83,7 @@ class STT(stt.STT):
     def stream(
         self,
         *,
-        language: JtLanguages | str | None = None,
+        language: STTLanguages | str | None = None,
     ) -> "SpeechStream":
         config = self._sanitize_options(language=language)
         return SpeechStream(config, self._api_key, self._ensure_session())
@@ -224,6 +224,8 @@ class SpeechStream(stt.SpeechStream):
         """
 
         closing_ws = False
+        last_voice_time = None
+        new_speech = False
 
         async def keepalive_task():
             # if we want to keep the connection alive even if no audio is sent,
@@ -262,9 +264,17 @@ class SpeechStream(stt.SpeechStream):
 
         async def recv_task():
             nonlocal closing_ws
+            nonlocal last_voice_time
+            nonlocal new_speech
+
+            history_text: str = ""
 
             while True:
                 msg = await ws.receive()
+
+                last_voice_time = time.time()
+
+                logger.debug(f"msg: {msg}")
 
                 if msg.type in (
                     aiohttp.WSMsgType.CLOSED,
@@ -285,29 +295,41 @@ class SpeechStream(stt.SpeechStream):
                 try:
                     # received a message from asr
                     data = json.loads(msg.data)
+
+                    if data["is_final"]:
+                        data["text"] = history_text
+                        history_text = ""
+                    else:
+                        if data["mode"] == "2pass-offline":
+                            history_text += data["text"]
+                            data["text"] = history_text
+                        else:
+                            data["text"] = history_text + data["text"]
+                        new_speech = True
+
                     self._process_stream_event(data)
-                    # if data["is_final"] == False and data["mode"] == "2pass-offline":
-                    #     await ws.send_json(SpeechStream._CLOSE_MSG)
                 except Exception:
                     logger.exception("failed to asr deepgram message")
 
-        # async def detect_finish_task():
-        #     try:
-        #         while True:
-        #             logger.debug(f"detect_finish_task {is_recent_speak} - {last_voice_time}")
-        #             current_time = time.time()
-        #             if (
-        #                 is_recent_speak
-        #                 and last_voice_time is not None
-        #                 and (current_time - last_voice_time) > 2
-        #             ):
-        #                 is_recent_speak = False
-        #                 await ws.send_json(SpeechStream._CLOSE_MSG)
-        #             await asyncio.sleep(2)
-        #     except Exception:
-        #         pass
+        async def detect_finish_task():
+            nonlocal last_voice_time
+            nonlocal new_speech
 
-        await asyncio.gather(send_task(), recv_task())
+            try:
+                while True:
+                    current_time = time.time()
+                    if (
+                        last_voice_time is not None
+                        and new_speech
+                        and (current_time - last_voice_time) > 3
+                    ):
+                        new_speech = False
+                        await ws.send_json(SpeechStream._CLOSE_MSG)
+                    await asyncio.sleep(1)
+            except Exception:
+                pass
+
+        await asyncio.gather(send_task(), recv_task(), detect_finish_task())
 
     def _end_speech(self) -> None:
         if not self._speaking:
@@ -349,11 +371,11 @@ class SpeechStream(stt.SpeechStream):
         assert self._opts.language is not None
 
         logger.debug(f"_process_stream_event: {data}")
-        # is_final_transcript = data["is_final"]
-        if data["mode"] == "2pass-offline":
-            is_final_transcript = True
-        else:
-            is_final_transcript = False
+        is_final_transcript = data["is_final"]
+        # if data["mode"] == "2pass-offline":
+        #     is_final_transcript = True
+        # else:
+        #     is_final_transcript = False
 
         alts = live_transcription_to_speech_data(self._opts.language, data)
         # If, for some reason, we didn't get a SpeechStarted event but we got

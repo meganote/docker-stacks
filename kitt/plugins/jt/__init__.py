@@ -1,9 +1,20 @@
 from .stt import STT, SpeechStream
+from .tts import DEFAULT_VOICE, TTS, Voice, VoiceSettings
+from .llm import LLM, LLMStream
+from .models import TTSEncoding, TTSModels
 from .version import __version__
 
 __all__ = [
     "STT",
     "SpeechStream",
+    "TTS",
+    "Voice",
+    "VoiceSettings",
+    "TTSEncoding",
+    "TTSModels",
+    "DEFAULT_VOICE",
+    "LLM",
+    "LLMStream",
     "__version__",
 ]
 

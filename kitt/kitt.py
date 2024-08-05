@@ -5,14 +5,14 @@ from collections import deque
 from typing import Annotated, List
 
 from livekit import agents, rtc
-from livekit.agents import JobContext, JobRequest, WorkerOptions, cli
+from livekit.agents import JobContext, JobRequest, WorkerOptions, cli, tokenize
 from livekit.agents.llm import (
     ChatContext,
     ChatMessage,
     ChatRole,
 )
 from livekit.agents.voice_assistant import AssistantContext, VoiceAssistant
-from livekit.plugins import deepgram, elevenlabs, openai, silero
+from livekit.plugins import nltk, silero
 
 from plugins import jt
 
@@ -74,9 +74,10 @@ async def entrypoint(ctx: JobContext):
         ]
     )
 
-    gpt = openai.LLM(
-        model="gpt-4o",
-    )
+    # gpt = openai.LLM(
+    #     model="gpt-4o",
+    # )
+    cm = jt.LLM(model="qwen-v2")
     latest_image: rtc.VideoFrame | None = None
     img_msg_queue: deque[agents.llm.ChatMessage] = deque()
     assistant = VoiceAssistant(
@@ -84,19 +85,22 @@ async def entrypoint(ctx: JobContext):
             model_path="/root/.cache/torch/hub/snakers4-silero-vad-7a176cc/files/silero_vad.jit"
         ),
         stt=jt.STT(),
-        llm=gpt,
+        llm=cm,
         tts=jt.TTS(),
         fnc_ctx=None if sip else AssistantFnc(),
         chat_ctx=initial_ctx,
+        allow_interruptions=True,
+        debug=True,
     )
 
     chat = rtc.ChatManager(ctx.room)
 
     async def _answer_from_text(text: str):
-        chat_ctx = copy.deepcopy(assistant.chat_context)
-        chat_ctx.messages.append(ChatMessage(role=ChatRole.USER, text=text))
+        # chat_ctx = copy.deepcopy(assistant.chat_context)
+        # chat_ctx.messages.append(ChatMessage(role=ChatRole.USER, text=text))
+        assistant.chat_context.messages.append(ChatMessage(role=ChatRole.USER, text=text))
 
-        stream = await gpt.chat(chat_ctx)
+        stream = await cm.chat(assistant.chat_context)
         await assistant.say(stream)
 
     @chat.on("message_received")
@@ -124,7 +128,7 @@ async def entrypoint(ctx: JobContext):
             msg = img_msg_queue.popleft()
             msg.images = []
 
-        stream = await gpt.chat(initial_ctx)
+        stream = await cm.chat(initial_ctx)
         await assistant.say(stream, allow_interruptions=True)
 
     @assistant.on("function_calls_finished")
@@ -137,7 +141,10 @@ async def entrypoint(ctx: JobContext):
     assistant.start(ctx.room)
 
     await asyncio.sleep(0.5)
-    # await assistant.say("你好", allow_interruptions=True)
+    await assistant.say(
+        "Hey, how can I help you today?",
+        allow_interruptions=True,
+    )
     while ctx.room.connection_state == rtc.ConnectionState.CONN_CONNECTED:
         video_track = await get_human_video_track(ctx.room)
         async for event in rtc.VideoStream(video_track):
