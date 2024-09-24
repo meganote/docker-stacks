@@ -1,7 +1,8 @@
-from .stt import STT, SpeechStream
-from .tts import DEFAULT_VOICE, TTS, Voice, VoiceSettings
 from .llm import LLM, LLMStream
 from .models import TTSEncoding, TTSModels
+from .stt import STT, SpeechStream
+from .tokenizer import SentenceTokenizer, WordTokenizer
+from .tts import DEFAULT_VOICE, TTS, Voice, VoiceSettings
 from .version import __version__
 
 __all__ = [
@@ -15,6 +16,8 @@ __all__ = [
     "DEFAULT_VOICE",
     "LLM",
     "LLMStream",
+    "SentenceTokenizer",
+    "WordTokenizer",
     "__version__",
 ]
 

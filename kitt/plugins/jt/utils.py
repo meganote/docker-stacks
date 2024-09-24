@@ -1,7 +1,8 @@
 import os
-import jwt
 import time
 from typing import Optional
+
+import jwt
 
 
 def get_base_url(base_url: Optional[str]) -> str:

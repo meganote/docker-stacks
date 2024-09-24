@@ -3,8 +3,8 @@ import dataclasses
 import io
 import json
 import os
-import wave
 import time
+import wave
 from contextlib import suppress
 from dataclasses import dataclass
 from typing import List, Optional, Union
@@ -296,17 +296,28 @@ class SpeechStream(stt.SpeechStream):
                     # received a message from asr
                     data = json.loads(msg.data)
 
+                    logger.debug(f"1 - data_text: {data['text']}, history_text: {history_text}")
+
                     if data["is_final"]:
-                        data["text"] = history_text
-                        history_text = ""
+                        if history_text != "":
+                            data["text"] = history_text
+                            history_text = ""
+                        logger.debug(f"2 - data_text: {data['text']}, history_text: {history_text}")
                     else:
                         if data["mode"] == "2pass-offline":
                             history_text += data["text"]
                             data["text"] = history_text
+                            logger.debug(
+                                f"3 - data_text: {data['text']}, history_text: {history_text}"
+                            )
                         else:
                             data["text"] = history_text + data["text"]
+                            logger.debug(
+                                f"4 - data_text: {data['text']}, history_text: {history_text}"
+                            )
                         new_speech = True
 
+                    logger.debug(f"5- data_text: {data['text']}, history_text: {history_text}")
                     self._process_stream_event(data)
                 except Exception:
                     logger.exception("failed to asr deepgram message")
@@ -315,19 +326,26 @@ class SpeechStream(stt.SpeechStream):
             nonlocal last_voice_time
             nonlocal new_speech
 
+            logger.debug("starting detect_finish_task...")
+
             try:
                 while True:
                     current_time = time.time()
+
+                    if last_voice_time is not None:
+                        print(f"inter: {current_time - last_voice_time}, new_speech: {new_speech}")
+
                     if (
                         last_voice_time is not None
                         and new_speech
-                        and (current_time - last_voice_time) > 3
+                        and (current_time - last_voice_time) > 0.5
                     ):
                         new_speech = False
                         await ws.send_json(SpeechStream._CLOSE_MSG)
-                    await asyncio.sleep(1)
-            except Exception:
-                pass
+                    await asyncio.sleep(0.25)
+            except Exception as e:
+                # pass
+                print(f"Error: {e}")
 
         await asyncio.gather(send_task(), recv_task(), detect_finish_task())
 

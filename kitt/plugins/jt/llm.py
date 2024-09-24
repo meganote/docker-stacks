@@ -23,12 +23,11 @@ import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, MutableSet, Tuple
 
+import jiutianai
+import openai
 from livekit import rtc
 from livekit.agents import llm
 from livekit.agents.utils import images
-import openai
-
-import jiutianai
 
 from .log import logger
 from .models import ChatModels
@@ -65,6 +64,7 @@ class LLM(llm.LLM):
         n: int | None = 1,
     ) -> "LLMStream":
         opts = dict()
+
         if fnc_ctx:
             opts["tools"] = to_openai_tools(fnc_ctx)
 
@@ -337,5 +337,7 @@ def to_openai_tools(fnc_ctx: llm.FunctionContext):
                 },
             }
         )
+
+    print("tools: ", tools)
 
     return tools

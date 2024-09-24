@@ -26,12 +26,10 @@ from typing import List, Literal, Optional
 import aiohttp
 from livekit import rtc
 from livekit.agents import aio, tokenize, tts, utils
+from plugins import jt
 
 from .log import logger
-from .models import (
-    TTSEncoding,
-    TTSModels,
-)
+from .models import TTSEncoding, TTSModels
 
 _Encoding = Literal[
     "mp3",
@@ -91,6 +89,7 @@ class _TTSOptions:
     sample_rate: int
     streaming_latency: int
     word_tokenizer: tokenize.WordTokenizer
+    sentence_tokenizer: tokenize.SentenceTokenizer
     chunk_length_schedule: list[int]
 
 
@@ -107,7 +106,8 @@ class TTS(tts.TTS):
         # word_tokenizer: tokenize.WordTokenizer = tokenize.basic.WordTokenizer(
         #     ignore_punctuation=False  # punctuation can help for intonation
         # ),
-        word_tokenizer: tokenize.SentenceTokenizer = tokenize.basic.SentenceTokenizer(),
+        word_tokenizer: tokenize.WorkTokenizer = jt.WordTokenizer(),
+        sentence_tokenizer: tokenize.SentenceTokenizer = jt.SentenceTokenizer(),
         # default value of 11labs is [120, 160, 250, 290], but we want faster responses by default
         # (range is 50-500)
         chunk_length_schedule: list[int] = [80, 120, 200, 260],
@@ -131,6 +131,7 @@ class TTS(tts.TTS):
             sample_rate=self.sample_rate,
             streaming_latency=streaming_latency,
             word_tokenizer=word_tokenizer,
+            sentence_tokenizer=sentence_tokenizer,
             chunk_length_schedule=chunk_length_schedule,
         )
         self._session = http_session
@@ -277,7 +278,7 @@ class SynthesizeStream(tts.SynthesizeStream):
         self._main_task = asyncio.create_task(self._run(max_retry_per_segment))
         self._event_queue = asyncio.Queue[Optional[tts.SynthesisEvent]]()
         self._closed = False
-        self._word_stream = opts.word_tokenizer.stream()
+        self._word_stream = opts.sentence_tokenizer.stream()
 
     def _stream_url(self) -> str:
         base_url = self._opts.base_url
@@ -300,6 +301,8 @@ class SynthesizeStream(tts.SynthesizeStream):
         if token is None:
             self._word_stream.mark_segment_end()
             return
+
+        print(f"_word_stream.push_text: {token}")
 
         self._word_stream.push_text(token)
 

@@ -2,24 +2,28 @@ import asyncio
 import copy
 import logging
 from collections import deque
+from enum import Enum
 from typing import Annotated, List
 
 from livekit import agents, rtc
-from livekit.agents import JobContext, JobRequest, WorkerOptions, cli, tokenize
-from livekit.agents.llm import (
-    ChatContext,
-    ChatMessage,
-    ChatRole,
-)
+from livekit.agents import JobContext, JobRequest, WorkerOptions, cli, llm, tokenize
+from livekit.agents.llm import ChatContext, ChatMessage, ChatRole
 from livekit.agents.voice_assistant import AssistantContext, VoiceAssistant
 from livekit.plugins import nltk, silero
-
 from plugins import jt
 
 MAX_IMAGES = 3
 NO_IMAGE_MESSAGE_GENERIC = (
     "I'm sorry, I don't have an image to process. Are you publishing your video?"
 )
+
+
+class Room(Enum):
+    BEDROOM = "bedroom"
+    LIVING_ROOM = "living room"
+    KITCHEN = "kitchen"
+    BATHROOM = "bathroom"
+    OFFICE = "office"
 
 
 class AssistantFnc(agents.llm.FunctionContext):
@@ -35,6 +39,23 @@ class AssistantFnc(agents.llm.FunctionContext):
     ):
         ctx = AssistantContext.get_current()
         ctx.store_metadata("user_msg", user_msg)
+
+    @llm.ai_callable(desc="Turn on/off the lights in a room")
+    async def toggle_light(
+        self,
+        room: Annotated[Room, llm.TypeInfo(desc="The specific room")],
+        status: bool,
+    ):
+        logging.info("toggle_light %s %s", room, status)
+        ctx = AssistantContext.get_current()
+        key = "enabled_rooms" if status else "disabled_rooms"
+        li = ctx.get_metadata(key, [])
+        li.append(room)
+        ctx.store_metadata(key, li)
+
+    @llm.ai_callable(desc="User want the assistant to stop/pause speaking")
+    def stop_speaking(self):
+        pass  # do nothing
 
 
 async def get_human_video_track(room: rtc.Room):
@@ -62,6 +83,9 @@ async def get_human_video_track(room: rtc.Room):
 
 async def entrypoint(ctx: JobContext):
     sip = ctx.room.name.startswith("sip")
+
+    fnc_ctx = AssistantFnc()
+
     initial_ctx = ChatContext(
         messages=[
             ChatMessage(
@@ -87,7 +111,7 @@ async def entrypoint(ctx: JobContext):
         stt=jt.STT(),
         llm=cm,
         tts=jt.TTS(),
-        fnc_ctx=None if sip else AssistantFnc(),
+        fnc_ctx=fnc_ctx,  # None if sip else AssistantFnc(),
         chat_ctx=initial_ctx,
         allow_interruptions=True,
         debug=True,
@@ -130,6 +154,10 @@ async def entrypoint(ctx: JobContext):
 
         stream = await cm.chat(initial_ctx)
         await assistant.say(stream, allow_interruptions=True)
+
+    @assistant.on("agent_speech_interrupted")
+    def _agent_speech_interrupted(chat_ctx: llm.ChatContext, msg: llm.ChatMessage):
+        msg.text += "... (user interrupted you)"
 
     @assistant.on("function_calls_finished")
     def _function_calls_done(ctx: AssistantContext):
