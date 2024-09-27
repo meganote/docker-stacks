@@ -20,7 +20,7 @@ env:
   ORGANIZATION: meganote
 
 jobs:
-  livy-spark:
+  livekit-server:
     runs-on: ubuntu-latest
     permissions:
       contents: read
