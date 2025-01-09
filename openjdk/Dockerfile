@@ -1,1 +1,1 @@
-FROM openjdk:17-jre-alphine
+FROM openjdk:17.0-jdk-slim
