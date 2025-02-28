@@ -1,1 +1,1 @@
-FROM eclipse-temurin:17-jdk-alpine
+FROM openjdk:17.0-jdk
