@@ -69,7 +69,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/ubuntu
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=raw,value=22.04.1
+            type=raw,value=noble
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
