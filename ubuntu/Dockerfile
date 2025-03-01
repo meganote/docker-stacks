@@ -1,1 +1,1 @@
-FROM ubuntu:22.04.1
+FROM ubuntu:noble
