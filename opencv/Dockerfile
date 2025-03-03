@@ -36,5 +36,5 @@ RUN git clone https://github.com/opencv/opencv.git && \
     git checkout ${OPENCV_VERSION} && \
     mkdir build && \
     cd build && \
-    cmake -D CMAKE_BUILD_TYPE=Release -D BUILD_SHARED_LIBS=OFF -D BUILD_JAVA=ON .. && \
+    cmake -D CMAKE_BUILD_TYPE=Release -D BUILD_SHARED_LIBS=OFF -D BUILD_JAVA=ON -D JAVA_HOME=${JAVA_HOME} .. && \
     make -j8
