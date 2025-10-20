@@ -18,7 +18,7 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   ORGANIZATION: meganote
-  TAG: 12.1.1
+  TAG: 12.2.0
 
 jobs:
   grafana:
