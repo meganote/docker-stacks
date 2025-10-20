@@ -1,4 +1,4 @@
-FROM docker.io/grafana/grafana:12.1.1
+FROM docker.io/grafana/grafana:12.2.0
 
 USER root
 RUN  grafana cli --pluginUrl=https://github.com/grafana/traces-drilldown/releases/download/v1.2.0/grafana-exploretraces-app-1.2.0.zip plugins install grafana-traces-app
