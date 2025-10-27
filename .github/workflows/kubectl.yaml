@@ -54,7 +54,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/bitnami/kubectl
+          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/kubectl
           # generate Docker tags based on the following events/attributes
           tags: |
             type=raw,value=${{ env.TAG }}
