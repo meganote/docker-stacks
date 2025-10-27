@@ -18,7 +18,7 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   ORGANIZATION: meganote
-  TAG: latest
+  TAG: v1.34.1
 
 jobs:
   kubectl:
