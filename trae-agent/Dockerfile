@@ -8,6 +8,6 @@ RUN apt-get update && \
 
 WORKDIR ${APP_DIR}
 RUN pip install uv && \
-    git clone https://github.com/bytedance/trae-agent.git ${APP_DIR} && \
+    git clone https://github.com/bytedance/trae-agent.git && \
     cd trae-agent && \
     uv sync --all-extras
