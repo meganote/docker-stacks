@@ -1,0 +1,51 @@
+name: Sync Docker Hub Images to GHCR
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: 'List of Docker images (with docker.io/ prefix), separated by semicolon (;)'
+        required: true
+        default: 'docker.io/nginx:1.25;docker.io/redis:7.0;docker.io/kubernetesui/dashboard-api:1.14.0'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and Push Images to GHCR
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          INPUT_IMAGES="${{ github.event.inputs.images }}"
+          
+          IFS=';' read -ra IMAGE_LIST <<< "$INPUT_IMAGES"
+          for src_image in "${IMAGE_LIST[@]}"; do
+            src_image=$(echo "$src_image" | xargs)
+
+            if [[ -z "$src_image" ]]; then
+              continue
+            fi
+
+            if [[ "$src_image" != docker.io/* ]]; then
+              echo "⚠️ Warning: Skipping non-docker.io image: $src_image"
+              continue
+            fi
+
+            target_image="ghcr.io/$OWNER/${src_image#docker.io/}"
+
+            echo "🔁 Syncing: $src_image → $target_image"
+
+            docker pull "$src_image"
+            docker tag "$src_image" "$target_image"
+            docker push "$target_image"
+          done
