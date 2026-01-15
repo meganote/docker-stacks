@@ -50,7 +50,7 @@ jobs:
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
-      - name: Build and push Docker image
+      - name: Build and push clickhouse image
         id: clickhouse
         uses: docker/build-push-action@v5
         with:
@@ -58,3 +58,57 @@ jobs:
           file: ./langfuse/clickhouse.dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/clickhouse:25.2.1-debian-12-r0
+
+      - name: Build and push langfuse-worker image
+        id: clickhoulangfuse-workerse
+        uses: docker/build-push-action@v5
+        with:
+          context: ./langfuse
+          file: ./langfuse/langfuse-worker.dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/langfuse-worker:3.146.0
+
+      - name: Build and push langfuse image
+        id: langfuse
+        uses: docker/build-push-action@v5
+        with:
+          context: ./langfuse
+          file: ./langfuse/langfuse.dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/langfuse:3.146.0
+
+      - name: Build and push minio image
+        id: minio
+        uses: docker/build-push-action@v5
+        with:
+          context: ./langfuse
+          file: ./langfuse/minio.dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/minio:2024.12.18-debian-12-r1
+
+      - name: Build and push postgresql image
+        id: postgresql
+        uses: docker/build-push-action@v5
+        with:
+          context: ./langfuse
+          file: ./langfuse/postgresql.dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/postgresql:17.3.0-debian-12-r1
+
+      - name: Build and push valkey image
+        id: valkey
+        uses: docker/build-push-action@v5
+        with:
+          context: ./langfuse
+          file: ./langfuse/valkey.dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/valkey:8.0.2-debian-12-r2
+
+      - name: Build and push zookeeper image
+        id: zookeeper
+        uses: docker/build-push-action@v5
+        with:
+          context: ./langfuse
+          file: ./langfuse/zookeeper.dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/zookeeper:3.9.3-debian-12-r8
