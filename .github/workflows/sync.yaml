@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       images:
-        description: 'List of Docker images (with docker.io/ prefix), separated by semicolon (;)'
+        description: "List of Docker images (with docker.io/ or registry.k8s.io/ prefix), separated by semicolon (;)"
         required: true
-        default: 'docker.io/nginx:1.25;docker.io/redis:7.0;docker.io/kubernetesui/dashboard-api:1.14.0'
+        default: "registry.k8s.io/agent-sandbox/agent-sandbox-controller:v0.1.1"
 
 jobs:
   sync:
@@ -27,7 +27,7 @@ jobs:
           OWNER: ${{ github.repository_owner }}
         run: |
           INPUT_IMAGES="${{ github.event.inputs.images }}"
-          
+
           IFS=';' read -ra IMAGE_LIST <<< "$INPUT_IMAGES"
           for src_image in "${IMAGE_LIST[@]}"; do
             src_image=$(echo "$src_image" | xargs)
@@ -36,12 +36,15 @@ jobs:
               continue
             fi
 
-            if [[ "$src_image" != docker.io/* ]]; then
-              echo "⚠️ Warning: Skipping non-docker.io image: $src_image"
+            # 支持 docker.io 和 registry.k8s.io 前缀
+            if [[ "$src_image" == docker.io/* ]]; then
+              target_image="ghcr.io/$OWNER/${src_image#docker.io/}"
+            elif [[ "$src_image" == registry.k8s.io/* ]]; then
+              target_image="ghcr.io/$OWNER/${src_image#registry.k8s.io/}"
+            else
+              echo "⚠️ Warning: Skipping unsupported image (must start with docker.io/ or registry.k8s.io/): $src_image"
               continue
             fi
-
-            target_image="ghcr.io/$OWNER/${src_image#docker.io/}"
 
             echo "🔁 Syncing: $src_image → $target_image"
 
