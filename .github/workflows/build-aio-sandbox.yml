@@ -18,7 +18,7 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   ORGANIZATION: meganote
-  TAG: v1.0.0.152
+  TAG: 1.0.0.152
 
 jobs:
   sandbox:
