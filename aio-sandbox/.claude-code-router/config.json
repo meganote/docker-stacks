@@ -1,0 +1,22 @@
+{
+    "PORT": 3459,
+    "LOG": false,
+    "LOG_LEVEL": "log",
+    "Providers": [
+        {
+            "name": "provider",
+            "api_base_url": "$BASE_URL}",
+            "api_key": "${API_KEY}",
+            "models": "${MODELS}",
+            "transformer": {
+                "use": [
+                    "openrouter"
+                ]
+            }
+        }
+    ],
+    "Router": {
+        "default": "${ROUTER_DEFAULT}",
+        "longContextThreshold": 160000
+    }
+}
