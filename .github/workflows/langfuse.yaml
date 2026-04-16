@@ -66,7 +66,7 @@ jobs:
           context: ./langfuse
           file: ./langfuse/langfuse-worker.dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/langfuse-worker:3.146.0
+          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/langfuse-worker:3.167.4
 
       - name: Build and push langfuse image
         id: langfuse
@@ -75,7 +75,7 @@ jobs:
           context: ./langfuse
           file: ./langfuse/langfuse.dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/langfuse:3.146.0
+          tags: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/langfuse:3.167.4
 
       - name: Build and push minio image
         id: minio
