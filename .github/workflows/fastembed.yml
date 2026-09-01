@@ -54,7 +54,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/agent-infra/sandbox
+          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/fastembed
           # generate Docker tags based on the following events/attributes
           tags: |
             type=raw,value=latest
