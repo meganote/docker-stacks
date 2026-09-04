@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 parallel_threads = int(os.getenv("EMBED_THREADS", str(os.cpu_count())))
 logger.info(f"Using parallel={parallel_threads}")
-model = TextEmbedding(model_name="nomic-ai/nomic-embed-text-v1.5-Q")
+model = TextEmbedding(model_name="BAAI/bge-small-zh-v1.5")
 app = FastAPI()
 
 
