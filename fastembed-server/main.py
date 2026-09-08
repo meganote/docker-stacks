@@ -6,6 +6,8 @@ import logging
 import os
 import secrets
 import time
+import secrets
+import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,6 +19,13 @@ logger.info(f"Using model={MODEL_NAME}")
 model = TextEmbedding(model_name=MODEL_NAME, threads=parallel_threads)
 model = TextEmbedding(model_name=MODEL_NAME)
 app = FastAPI()
+
+
+def count_tokens(texts: list[str]) -> int:
+    try:
+        return sum(len(model.tokenizer.encode(t)) for t in texts)
+    except Exception:
+        return sum(len(t) for t in texts)
 
 
 def count_tokens(texts: list[str]) -> int:
@@ -68,9 +77,30 @@ def _process_embeddings(texts: list[str], quantize: bool):
         return result
     except HTTPException:
         raise
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Embedding failed: {e}")
         raise HTTPException(500, f"Embedding failed: {str(e)}")
+
+
+def _build_response(embeds: list, prompt_tokens: int) -> dict:
+    return {
+        "id": f"embd-{secrets.token_hex(8)}",
+        "object": "list",
+        "created": int(time.time()),
+        "model": MODEL_NAME,
+        "data": [
+            {"index": i, "object": "embedding", "embedding": e}
+            for i, e in enumerate(embeds)
+        ],
+        "usage": {
+            "prompt_tokens": prompt_tokens,
+            "total_tokens": prompt_tokens,
+            "completion_tokens": 0,
+            "prompt_tokens_details": None,
+        },
+    }
 
 
 def _build_response(embeds: list, prompt_tokens: int) -> dict:
@@ -96,11 +126,13 @@ def _build_response(embeds: list, prompt_tokens: int) -> dict:
 def embeddings(req: EmbedRequest):
     embeds = _process_embeddings(req.input, False)
     return _build_response(embeds, count_tokens(req.input))
+    return _build_response(embeds, count_tokens(req.input))
 
 
 @app.post("/v1/embeddings/binary")
 def embeddings_binary(req: EmbedRequest):
     embeds = _process_embeddings(req.input, True)
+    return _build_response(embeds, count_tokens(req.input))
     return _build_response(embeds, count_tokens(req.input))
 
 
