@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13-slim AS model-fetcher
+FROM python:3.13-slim AS builder
 
 RUN pip install --no-cache-dir fastembed
 
-# 预下载模型到默认缓存目录 /tmp/fastembed_cache
-RUN python -c "from fastembed import TextEmbedding; TextEmbedding(model_name='BAAI/bge-small-zh-v1.5')"
+ARG EMBED_MODEL_NAME=BAAI/bge-small-zh-v1.5
+RUN python -c "from fastembed import TextEmbedding; TextEmbedding(model_name='${EMBED_MODEL_NAME}')"
 
 FROM python:3.13-slim
 
@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir uv \
 
 COPY main.py ./
 
-COPY --from=model-fetcher /tmp/fastembed_cache /tmp/fastembed_cache
+COPY --from=builder /tmp/fastembed_cache /tmp/fastembed_cache
 
 RUN useradd -m appuser && chown -R appuser:appuser /app /tmp/fastembed_cache
 USER appuser
